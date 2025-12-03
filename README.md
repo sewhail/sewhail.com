@@ -1,6 +1,6 @@
 # sewhail
 
-ultra-minimal portfolio website with a nerdy, terminal-inspired aesthetic.
+ultra-minimal portfolio website with a terminal-inspired aesthetic.
 
 ## stack
 
