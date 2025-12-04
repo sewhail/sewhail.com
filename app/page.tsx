@@ -62,7 +62,7 @@ export default function Page() {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="h-6 w-6 p-0 rounded-none transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95 active:rotate-0"
+              className="h-6 w-6 p-0 rounded-none transition-transform duration-500 ease-in-out hover:rotate-180 active:rotate-180 hover:bg-transparent"
             >
               <div className="transition-transform duration-500 ease-in-out">
                 {isDark ? <Sun className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> : <Moon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />}
