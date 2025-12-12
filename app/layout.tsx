@@ -1,10 +1,28 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
-export const metadata = {
-  title: "sewhail",
-  description: "Software engineer from Amsterdam, the Netherlands. Focused on web development and machine learning.",
+export const metadata: Metadata = {
+  title: "suhail — software engineer",
+  description: "Software engineer from Amsterdam, Netherlands. Building web experiences and exploring machine learning.",
+  keywords: ["software engineer", "web developer", "machine learning", "fullstack", "amsterdam", "portfolio"],
+  authors: [{ name: "Suhail" }],
+  openGraph: {
+    title: "suhail — software engineer",
+    description: "Software engineer from Amsterdam, Netherlands. Building web experiences and exploring machine learning.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: "suhail — software engineer",
+    description: "Software engineer from Amsterdam, Netherlands. Building web experiences and exploring machine learning.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{
