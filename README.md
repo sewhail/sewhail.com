@@ -1,30 +1,5 @@
-# sewhail
+# sewhail.com
 
-ultra-minimal portfolio website with a terminal-inspired aesthetic.
+My personal website.
 
-## stack
-
-- next.js 16
-- typescript
-- tailwind css 4
-- shadcn/ui
-- jetbrains mono
-
-## features
-
-- light/dark mode
-- terminal-style design
-- monospace typography
-- ultra-minimal aesthetic
-- responsive
-
-## dev
-
-```bash
-bun install
-bun dev
-```
-
-## license
-
-mit
+**Stack:** Next.js · TypeScript · Tailwind CSS · shadcn/ui
