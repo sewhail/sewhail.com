@@ -2,20 +2,16 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: "suhail — software engineer",
-  description: "Software engineer from Amsterdam, Netherlands. Building web experiences and exploring machine learning.",
-  keywords: ["software engineer", "web developer", "machine learning", "fullstack", "amsterdam", "portfolio"],
+  title: "suhail",
   authors: [{ name: "Suhail" }],
   openGraph: {
-    title: "suhail — software engineer",
-    description: "Software engineer from Amsterdam, Netherlands. Building web experiences and exploring machine learning.",
+    title: "suhail",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
     title: "suhail — software engineer",
-    description: "Software engineer from Amsterdam, Netherlands. Building web experiences and exploring machine learning.",
   },
   robots: {
     index: true,
