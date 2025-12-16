@@ -2,16 +2,16 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: "suhail",
+  title: "sewhail.com",
   authors: [{ name: "Suhail" }],
   openGraph: {
-    title: "suhail",
+    title: "sewhail.com",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "suhail — software engineer",
+    title: "sewhail.com",
   },
   robots: {
     index: true,
