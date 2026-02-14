@@ -1,0 +1,209 @@
+@import "tailwindcss";
+
+/* ── Base ─────────────────────────────────────────── */
+
+:root {
+  --bg: #1a1a1a;
+  --fg: #d4d4d4;
+  --muted: #888;
+  --link: #999;
+  --link-hover: #ccc;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* font scale */
+  --text-xs: 0.6875rem;
+  /* 11px — labels, fine print */
+  --text-sm: 0.8125rem;
+  /* 13px — secondary content */
+  --text-base: 0.875rem;
+  /* 14px — body text */
+  --text-md: 1.0625rem;
+  /* 17px — tagline */
+  --text-lg: 1.25rem;
+  /* 20px — name / title */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* ── Layout ───────────────────────────────────────── */
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 80px 24px 120px;
+}
+
+/* ── Header ───────────────────────────────────────── */
+
+.name {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin-bottom: 20px;
+  color: #e5e5e5;
+}
+
+.bio-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.bio-text p {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* ── Sections ─────────────────────────────────────── */
+
+.section {
+  margin-top: 48px;
+}
+
+.section p {
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--fg);
+  margin-bottom: 16px;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+.tagline {
+  font-style: italic;
+  font-size: var(--text-md);
+  color: #bbb;
+  margin-bottom: 28px;
+}
+
+.section-heading {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e5e5e5;
+  margin-bottom: 16px;
+}
+
+/* ── Links ────────────────────────────────────────── */
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, 0.2);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Garden list ──────────────────────────────────── */
+
+.garden-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.garden-list li a {
+  font-size: var(--text-sm);
+  color: var(--link);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.garden-list li a:hover {
+  color: var(--link-hover);
+}
+
+/* ── Stack list ───────────────────────────────────── */
+
+.stack-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stack-item {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  padding: 4px 10px;
+  border: 1px solid #333;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Scrollbar ────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page {
+    padding: 48px 20px 80px;
+  }
+
+  body {
+    font-size: var(--text-sm);
+  }
+}
