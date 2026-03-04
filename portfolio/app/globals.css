@@ -200,10 +200,83 @@ a:hover {
 
 @media (max-width: 640px) {
   .page {
-    padding: 48px 20px 80px;
+    padding: 40px 20px 64px;
   }
 
   body {
     font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+
+  .name {
+    font-size: var(--text-lg);
+    margin-bottom: 14px;
+  }
+
+  .avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .bio-text p {
+    font-size: var(--text-xs);
+  }
+
+  .section {
+    margin-top: 36px;
+  }
+
+  .section p {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .tagline {
+    font-size: var(--text-base);
+    margin-bottom: 20px;
+  }
+
+  .section-heading {
+    font-size: var(--text-xs);
+    margin-bottom: 12px;
+  }
+
+  .garden-list {
+    gap: 4px;
+  }
+
+  .garden-list li,
+  .garden-list li a {
+    font-size: var(--text-xs);
+  }
+
+  .stack-list {
+    gap: 6px;
+  }
+
+  .stack-item {
+    font-size: 0.625rem;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .page {
+    padding: 32px 16px 48px;
+  }
+
+  .name {
+    font-size: var(--text-base);
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+  }
+
+  .bio-row {
+    gap: 12px;
   }
 }
