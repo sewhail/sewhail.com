@@ -2,21 +2,34 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: "suhail",
-  description: "Product-focused software engineer based in Amsterdam.",
+  metadataBase: new URL("https://sewhail.com"),
+  title: "Suhail — Software Engineer",
+  description: "Software engineer in Amsterdam building software for hard problems.",
   authors: [{ name: "Suhail" }],
   openGraph: {
-    title: "suhail",
-    description: "Product-focused software engineer based in Amsterdam.",
+    title: "Suhail — Software Engineer",
+    description: "Software engineer in Amsterdam building software for hard problems.",
+    url: "/",
+    siteName: "Suhail",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/social-card.png",
+        width: 1200,
+        height: 630,
+        alt: "Suhail — software engineer in Amsterdam",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
-    title: "suhail",
+    card: "summary_large_image",
+    title: "Suhail — Software Engineer",
+    description: "Software engineer in Amsterdam building software for hard problems.",
+    images: ["/social-card.png"],
   },
   icons: {
-    icon: '/icon.svg',
+    icon: '/icon.svg?v=2',
   },
   robots: {
     index: true,
@@ -31,11 +44,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
-      </head>
       <body>{children}</body>
     </html>
   )

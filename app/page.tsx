@@ -1,81 +1,71 @@
-import Image from 'next/image';
+import { Portrait } from "./portrait";
+import currentRead from "@/content/current-read.json";
 
 export default function Page() {
   return (
     <main className="page">
-      {/* Header */}
-      <section className="header">
+      <header className="header">
         <h1 className="name">suhail</h1>
+
         <div className="bio-row">
-          <Image
-            src="/avatar.jpg"
-            alt="Suhail"
-            width={64}
-            height={64}
-            className="avatar"
-          />
+          <Portrait />
+
           <div className="bio-text">
             <p>software engineer</p>
             <p className="muted">amsterdam, the netherlands</p>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* About */}
-      <section className="section">
-        <p className="tagline">software engineer // web development + machine learning.</p>
+      <section className="section" aria-labelledby="intro">
+        <h2 className="tagline" id="intro">
+          I build software for hard problems.
+        </h2>
 
         <p>
-          I&apos;m interested in open source, delightful user experiences, and the future of technology.
+          Lately, I&apos;ve been learning how AI and ML systems work, and trying
+          to build things that are genuinely useful.
         </p>
 
-        <p>
-          When not writing code, I enjoy admiring bookshelves, capturing photographs, reading, and discovering more about what I don&apos;t know.
-        </p>
+        <aside className="current-read" aria-labelledby="current-read-label">
+          <svg
+            className="current-read-mark"
+            viewBox="0 0 24 32"
+            aria-hidden="true"
+          >
+            <path d="M5 3.5 18.5 3 19 27.5 12.2 23.5 5.5 28Z" />
+            <path d="m8.5 8 7-.3M8.5 11.5l5.5-.2" />
+          </svg>
 
-        <p>
-          Building meaningful digital experiences.
-        </p>
+          <div>
+            <p className="current-read-label" id="current-read-label">
+              currently reading
+            </p>
+            <p className="current-read-book">
+              <cite>{currentRead.title}</cite>
+              <span>{currentRead.author}</span>
+            </p>
+          </div>
+        </aside>
 
-        <p>
-          Find me on{' '}
-          <a href="https://github.com/sewhail" target="_blank" rel="noopener noreferrer">GitHub</a>,{' '}
-          <a href="https://linkedin.com/in/sewhail" target="_blank" rel="noopener noreferrer">LinkedIn</a>, or{' '}
-          <a href="https://x.com" target="_blank" rel="noopener noreferrer">Twitter</a>.
-        </p>
-      </section>
-
-      {/* Current */}
-      <section className="section">
-        <h2 className="section-heading">Now</h2>
-        <ul className="garden-list">
-          <li>exploring ml fundamentals</li>
-          <li>mathematical concepts deep dive</li>
-          <li>advancing python skills</li>
-          <li>building practical projects</li>
-        </ul>
-      </section>
-
-      {/* Stack */}
-      <section className="section">
-        <h2 className="section-heading">Stack</h2>
-        <div className="stack-list">
-          {['js', 'py', 'react', 'node', 'ts', 'psql', 'docker', 'aws'].map((skill) => (
-            <span key={skill} className="stack-item">{skill}</span>
-          ))}
-        </div>
-      </section>
-
-      {/* Contact */}
-      <section className="section">
-        <h2 className="section-heading">Contact</h2>
-        <p>
-          Open to opportunities and collaborations.
-          <br />
-          Let&apos;s build something together.
-        </p>
-        <p>
-          <a href="mailto:sxhail@outlook.in">sxhail@outlook.in</a>
+        <p className="links" aria-label="Contact links">
+          <a
+            href="https://github.com/sewhail"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+          <span aria-hidden="true">, </span>
+          <a
+            href="https://linkedin.com/in/sewhail"
+            target="_blank"
+            rel="noreferrer"
+          >
+            LinkedIn
+          </a>
+          <span aria-hidden="true">, </span>
+          <a href="mailto:sxhail@outlook.in">Email</a>
         </p>
       </section>
     </main>
