@@ -1,31 +1,40 @@
 import { Portrait } from "./portrait";
+import { ThemeToggle } from "./theme-toggle";
 import currentRead from "@/content/current-read.json";
 
 export default function Page() {
   return (
     <main className="page">
       <header className="header">
-        <h1 className="name">suhail</h1>
-
         <div className="bio-row">
           <Portrait />
 
-          <div className="bio-text">
-            <p>software engineer</p>
-            <p className="muted">amsterdam, the netherlands</p>
+          <div className="identity">
+            <h1 className="name">
+              suhail<span aria-hidden="true">.</span>
+            </h1>
+
+            <div className="bio-text">
+              <p>software engineer</p>
+              <p className="muted">amsterdam, the netherlands</p>
+            </div>
           </div>
         </div>
+
+        <ThemeToggle />
       </header>
 
       <section className="section" aria-labelledby="intro">
-        <h2 className="tagline" id="intro">
-          I build software for hard problems.
-        </h2>
+        <div className="intro-copy">
+          <h2 className="tagline" id="intro">
+            I build software for hard problems.
+          </h2>
 
-        <p>
-          Lately, I&apos;ve been learning how AI and ML systems work, and trying
-          to build things that are genuinely useful.
-        </p>
+          <p>
+            Lately, I&apos;ve been learning how AI and ML systems work, and
+            trying to build things that are genuinely useful.
+          </p>
+        </div>
 
         <aside className="current-read" aria-labelledby="current-read-label">
           <svg
@@ -48,25 +57,25 @@ export default function Page() {
           </div>
         </aside>
 
-        <p className="links" aria-label="Contact links">
-          <a
-            href="https://github.com/sewhail"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub
-          </a>
-          <span aria-hidden="true">, </span>
-          <a
-            href="https://linkedin.com/in/sewhail"
-            target="_blank"
-            rel="noreferrer"
-          >
-            LinkedIn
-          </a>
-          <span aria-hidden="true">, </span>
-          <a href="mailto:sxhail@outlook.in">Email</a>
-        </p>
+        <footer className="footer">
+          <nav className="links" aria-label="Contact links">
+            <a
+              href="https://github.com/sewhail"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://linkedin.com/in/sewhail"
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn
+            </a>
+            <a href="mailto:sxhail@outlook.in">Email</a>
+          </nav>
+        </footer>
       </section>
     </main>
   );

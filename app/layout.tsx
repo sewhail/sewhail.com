@@ -1,6 +1,24 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
+const themeScript = `
+  (() => {
+    try {
+      const saved = localStorage.getItem("theme");
+      const theme =
+        saved === "light" || saved === "dark"
+          ? saved
+            : matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+      document.documentElement.dataset.theme = theme;
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", theme === "light" ? "#f5ecd9" : "#1a1a1a");
+    } catch {}
+  })();
+`;
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://sewhail.com"),
   title: "Suhail — Software Engineer",
@@ -43,7 +61,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#1a1a1a" />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>{children}</body>
     </html>
   )
