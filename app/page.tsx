@@ -73,7 +73,7 @@ export default function Page() {
             >
               LinkedIn
             </a>
-            <a href="mailto:sxhail@outlook.in">Email</a>
+            <a href="mailto:hello@sewhail.com">Email</a>
           </nav>
         </footer>
       </section>
