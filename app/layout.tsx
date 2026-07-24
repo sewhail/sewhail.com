@@ -21,14 +21,14 @@ const themeScript = `
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sewhail.com"),
-  title: "Suhail — Software Engineer",
-  description: "Software engineer in Amsterdam building software for hard problems.",
-  authors: [{ name: "Suhail" }],
+  title: "suhail.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Suhail — Software Engineer",
-    description: "Software engineer in Amsterdam building software for hard problems.",
+    title: "suhail.",
     url: "/",
-    siteName: "Suhail",
+    siteName: "suhail.",
     type: "website",
     locale: "en_US",
     images: [
@@ -36,22 +36,17 @@ export const metadata: Metadata = {
         url: "/social-card.png",
         width: 1200,
         height: 630,
-        alt: "Suhail — software engineer in Amsterdam",
+        alt: "suhail.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Suhail — Software Engineer",
-    description: "Software engineer in Amsterdam building software for hard problems.",
+    title: "suhail.",
     images: ["/social-card.png"],
   },
   icons: {
     icon: '/icon.svg?v=2',
-  },
-  robots: {
-    index: true,
-    follow: true,
   },
 };
 

@@ -179,6 +179,12 @@ body {
   }
 }
 
+@media (hover: none), (pointer: coarse), (max-width: 640px) {
+  .avatar-original {
+    filter: grayscale(0) contrast(1);
+  }
+}
+
 .portrait-button:active {
   transform: scale(0.98);
 }
@@ -262,23 +268,31 @@ body {
 .current-read {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-block: 2.25rem;
-  padding-block: 1.0625rem;
-  border-block: 1px solid var(--line);
+  width: fit-content;
+  max-width: min(15rem, 100%);
+  gap: 0.5625rem;
+  margin-block: 1.875rem;
+  padding: 0.375rem 0.5rem 0.5625rem 0;
+  background: linear-gradient(
+      90deg,
+      var(--line) 0%,
+      var(--line) 62%,
+      transparent 100%
+    )
+    bottom left / 100% 1px no-repeat;
   animation: settle-in 560ms 140ms cubic-bezier(0.22, 0.75, 0.2, 1) both;
-  transition: border-color 180ms ease;
 }
 
 .current-read-mark {
-  width: 1.3125rem;
-  height: 1.75rem;
+  width: 1rem;
+  height: 1.375rem;
   flex-shrink: 0;
   fill: none;
   stroke: var(--muted);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.1;
+  transform: rotate(-1.5deg);
   transition:
     stroke 180ms ease,
     transform 220ms cubic-bezier(0.22, 0.75, 0.2, 1);
@@ -293,16 +307,18 @@ body {
 .current-read-label {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 0.65625rem;
+  font-size: 0.59375rem;
+  letter-spacing: 0.035em;
   text-transform: lowercase;
 }
 
 .current-read-book {
   display: flex;
   flex-wrap: wrap;
-  column-gap: 0.5625rem;
-  font-size: 0.85rem;
+  column-gap: 0.4375rem;
+  font-size: 0.75rem;
   letter-spacing: -0.006em;
+  line-height: 1.4;
 }
 
 .current-read-book cite {
@@ -321,9 +337,9 @@ body {
 .links {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;
+  gap: 1rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
 }
 
 .footer {
@@ -490,7 +506,7 @@ a:focus-visible {
 @media (hover: hover) {
   .current-read:hover .current-read-mark {
     stroke: var(--subtle);
-    transform: translateY(-1px) rotate(-1.5deg);
+    transform: translateY(-1px) rotate(0);
   }
 
   .links a:hover::after {
@@ -596,8 +612,8 @@ a:focus-visible {
   }
 
   .current-read {
-    margin-block: 1.875rem;
-    padding-block: 1rem;
+    margin-block: 1.625rem;
+    padding-block: 0.3125rem 0.5rem;
   }
 
   .not-found-page {
