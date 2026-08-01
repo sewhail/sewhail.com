@@ -26,26 +26,32 @@ export function Portrait() {
   const nextPortrait = (activePortrait + 1) % portraits.length;
 
   return (
-    <button
-      className="portrait-button"
-      type="button"
-      aria-label={`Show ${portraits[nextPortrait].label} portrait`}
-      onClick={() => setActivePortrait(nextPortrait)}
-    >
-      {portraits.map((portrait, index) => (
-        <Image
-          key={portrait.src}
-          src={portrait.src}
-          alt=""
-          width={64}
-          height={64}
-          className={`avatar ${portrait.className}${
-            index === activePortrait ? "" : " is-hidden"
-          }`}
-          priority
-        />
-      ))}
-      <span className="sr-only">Portrait of Suhail</span>
-    </button>
+    <div className="portrait-control">
+      <button
+        className="portrait-button"
+        type="button"
+        aria-label={`Show ${portraits[nextPortrait].label} portrait`}
+        onClick={() => setActivePortrait(nextPortrait)}
+      >
+        {portraits.map((portrait, index) => (
+          <Image
+            key={portrait.src}
+            src={portrait.src}
+            alt=""
+            width={64}
+            height={64}
+            className={`avatar ${portrait.className}${
+              index === activePortrait ? "" : " is-hidden"
+            }`}
+            priority
+          />
+        ))}
+        <span className="sr-only">Portrait of Suhail</span>
+      </button>
+
+      <span className="portrait-hint" aria-hidden="true">
+        change portrait
+      </span>
+    </div>
   );
 }

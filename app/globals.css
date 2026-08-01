@@ -21,6 +21,9 @@
   --control-icon: #777772;
   --control-active: #ededE7;
   --control-shadow: rgba(0, 0, 0, 0.18);
+  --reading-paper: rgba(190, 163, 116, 0.055);
+  --reading-paper-hover: rgba(190, 163, 116, 0.085);
+  --reading-accent: #887966;
   --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI",
     sans-serif;
   --font-mono: "SFMono-Regular", "SF Mono", "Cascadia Mono", "Roboto Mono",
@@ -48,6 +51,9 @@
   --control-icon: #998e7c;
   --control-active: #3b352c;
   --control-shadow: rgba(83, 68, 44, 0.16);
+  --reading-paper: rgba(139, 101, 51, 0.06);
+  --reading-paper-hover: rgba(139, 101, 51, 0.095);
+  --reading-accent: #8b704d;
 }
 
 @media (prefers-color-scheme: light) {
@@ -72,6 +78,9 @@
     --control-icon: #998e7c;
     --control-active: #3b352c;
     --control-shadow: rgba(83, 68, 44, 0.16);
+    --reading-paper: rgba(139, 101, 51, 0.06);
+    --reading-paper-hover: rgba(139, 101, 51, 0.095);
+    --reading-accent: #8b704d;
   }
 }
 
@@ -107,10 +116,10 @@ body {
 
 .page {
   position: relative;
-  width: calc(100% - 3rem);
-  max-width: 42rem;
+  width: calc(100% - 4rem);
+  max-width: 54rem;
   margin-inline: auto;
-  padding-block: 5rem 7.5rem;
+  padding-block: 4rem 7.5rem;
 }
 
 .header {
@@ -122,6 +131,13 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 1.25rem;
+}
+
+.portrait-control {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
 }
 
 .portrait-button {
@@ -194,6 +210,34 @@ body {
   outline-offset: 0.25rem;
 }
 
+.portrait-hint {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 1;
+  width: max-content;
+  padding: 0.1875rem 0.375rem;
+  border: 1px solid var(--line);
+  border-radius: 0.25rem;
+  background: var(--control-background);
+  color: var(--muted);
+  font-size: 0.5625rem;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-0.2rem);
+  transition:
+    opacity 160ms ease,
+    transform 180ms cubic-bezier(0.22, 0.75, 0.2, 1);
+  white-space: nowrap;
+}
+
+.portrait-control:hover .portrait-hint,
+.portrait-control:focus-within .portrait-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -208,6 +252,12 @@ body {
 .identity {
   min-width: 0;
   padding-top: 0.0625rem;
+}
+
+.identity-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
 }
 
 .name {
@@ -240,14 +290,20 @@ body {
 }
 
 .section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  column-gap: 4rem;
+  align-items: start;
+  margin-top: 4.5rem;
+}
+
+.intro-copy {
   max-width: 34.5rem;
-  margin-top: 3.75rem;
-  margin-left: 5.25rem;
 }
 
 .intro-copy p {
   margin-top: 1.25rem;
-  color: var(--body-soft);
+  color: var(--subtle);
   font-size: 0.875rem;
   line-height: 1.8;
 }
@@ -266,33 +322,46 @@ body {
 }
 
 .current-read {
+  position: relative;
   display: flex;
-  align-items: center;
-  width: fit-content;
+  align-items: flex-start;
+  width: 100%;
   max-width: min(15rem, 100%);
-  gap: 0.5625rem;
-  margin-block: 1.875rem;
-  padding: 0.375rem 0.5rem 0.5625rem 0;
-  background: linear-gradient(
-      90deg,
-      var(--line) 0%,
-      var(--line) 62%,
-      transparent 100%
-    )
-    bottom left / 100% 1px no-repeat;
+  gap: 0.75rem;
+  margin-block: 0;
+  padding: 0.875rem 0.875rem 1rem 1rem;
+  border-radius: 0.125rem 0.375rem 0.375rem 0.125rem;
+  background-color: var(--reading-paper);
   animation: settle-in 560ms 140ms cubic-bezier(0.22, 0.75, 0.2, 1) both;
+  transition:
+    background-color 180ms ease,
+    transform 220ms cubic-bezier(0.22, 0.75, 0.2, 1);
+}
+
+.current-read::before {
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 0.125rem;
+  width: 1px;
+  background: var(--reading-accent);
+  content: "";
+  opacity: 0.7;
+  transform: rotate(-1.25deg);
+  transform-origin: center;
 }
 
 .current-read-mark {
-  width: 1rem;
-  height: 1.375rem;
+  width: 1.0625rem;
+  height: 1.5rem;
   flex-shrink: 0;
   fill: none;
-  stroke: var(--muted);
+  stroke: var(--reading-accent);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.1;
   transform: rotate(-1.5deg);
+  margin-top: 0.125rem;
   transition:
     stroke 180ms ease,
     transform 220ms cubic-bezier(0.22, 0.75, 0.2, 1);
@@ -305,7 +374,8 @@ body {
 }
 
 .current-read-label {
-  color: var(--muted);
+  margin-bottom: 0.1875rem;
+  color: var(--reading-accent);
   font-family: var(--font-mono);
   font-size: 0.59375rem;
   letter-spacing: 0.035em;
@@ -313,25 +383,32 @@ body {
 }
 
 .current-read-book {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 0.4375rem;
+  display: block;
   font-size: 0.75rem;
   letter-spacing: -0.006em;
   line-height: 1.4;
 }
 
 .current-read-book cite {
+  display: block;
   color: var(--book-title);
-  font-style: normal;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.9375rem;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .current-read-book span {
+  display: block;
+  margin-top: 0.1875rem;
   color: var(--muted);
+  font-size: 0.6875rem;
 }
 
 .current-read-book span::before {
-  content: "— ";
+  content: "by ";
 }
 
 .links {
@@ -343,14 +420,22 @@ body {
 }
 
 .footer {
+  grid-column: 1;
+  margin-top: 3rem;
   display: block;
   animation: settle-in 560ms 210ms cubic-bezier(0.22, 0.75, 0.2, 1) both;
 }
 
+.footer-label {
+  margin-bottom: 0.5rem;
+  color: var(--muted);
+  font-size: 0.59375rem;
+  letter-spacing: 0.035em;
+}
+
 .theme-toggle {
-  position: absolute;
-  top: 0.125rem;
-  right: 0;
+  position: relative;
+  flex-shrink: 0;
   width: 3.25rem;
   height: 1.75rem;
   padding: 0;
@@ -504,9 +589,14 @@ a:focus-visible {
 }
 
 @media (hover: hover) {
+  .current-read:hover {
+    background-color: var(--reading-paper-hover);
+    transform: translateY(-2px);
+  }
+
   .current-read:hover .current-read-mark {
     stroke: var(--subtle);
-    transform: translateY(-1px) rotate(0);
+    transform: translateY(-1px) rotate(1deg);
   }
 
   .links a:hover::after {
@@ -569,12 +659,29 @@ a:focus-visible {
   font-size: 0.75rem;
 }
 
+@media (max-width: 760px) {
+  .section {
+    display: block;
+    max-width: none;
+    margin-top: 3rem;
+  }
+
+  .current-read {
+    margin-block: 1.625rem;
+  }
+
+  .footer {
+    margin-top: 0;
+  }
+}
+
 @media (max-width: 640px) {
   .page {
     width: calc(100% - 2.5rem);
     padding-block: 2.5rem 4rem;
   }
 
+  .portrait-control,
   .portrait-button {
     width: 3.25rem;
     height: 3.25rem;
@@ -582,6 +689,10 @@ a:focus-visible {
 
   .bio-row {
     gap: 1rem;
+  }
+
+  .identity-tools {
+    gap: 0.75rem;
   }
 
   .name {
@@ -597,9 +708,7 @@ a:focus-visible {
   }
 
   .section {
-    max-width: none;
     margin-top: 3rem;
-    margin-left: 0;
   }
 
   .intro-copy p {
@@ -612,8 +721,11 @@ a:focus-visible {
   }
 
   .current-read {
-    margin-block: 1.625rem;
-    padding-block: 0.3125rem 0.5rem;
+    width: min(15rem, 100%);
+  }
+
+  .current-read-book cite {
+    white-space: normal;
   }
 
   .not-found-page {

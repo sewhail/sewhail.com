@@ -10,9 +10,13 @@ export default function Page() {
           <Portrait />
 
           <div className="identity">
-            <h1 className="name">
-              suhail<span aria-hidden="true">.</span>
-            </h1>
+            <div className="identity-tools">
+              <h1 className="name">
+                suhail<span aria-hidden="true">.</span>
+              </h1>
+
+              <ThemeToggle />
+            </div>
 
             <div className="bio-text">
               <p>software engineer</p>
@@ -20,8 +24,6 @@ export default function Page() {
             </div>
           </div>
         </div>
-
-        <ThemeToggle />
       </header>
 
       <section className="section" aria-labelledby="intro">
@@ -58,6 +60,7 @@ export default function Page() {
         </aside>
 
         <footer className="footer">
+          <p className="footer-label">elsewhere</p>
           <nav className="links" aria-label="Contact links">
             <a
               href="https://github.com/sewhail"
