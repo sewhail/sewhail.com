@@ -44,11 +44,17 @@ export default function Page() {
             viewBox="0 0 24 32"
             aria-hidden="true"
           >
-            <path d="M5 3.5 18.5 3 19 27.5 12.2 23.5 5.5 28Z" />
-            <path d="m8.5 8 7-.3M8.5 11.5l5.5-.2" />
+            <path
+              className="current-read-mark-outline"
+              d="M5 3.5 18.5 3 19 27.5 12.2 23.5 5.5 28Z"
+            />
+            <path
+              className="current-read-mark-lines"
+              d="m8.5 8 7-.3M8.5 11.5l5.5-.2"
+            />
           </svg>
 
-          <div>
+          <div className="current-read-copy">
             <p className="current-read-label" id="current-read-label">
               currently reading
             </p>
@@ -57,6 +63,8 @@ export default function Page() {
               <span>{currentRead.author}</span>
             </p>
           </div>
+
+          <span className="current-read-corner" aria-hidden="true" />
         </aside>
 
         <footer className="footer">
