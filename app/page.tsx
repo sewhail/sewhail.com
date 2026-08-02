@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Portrait } from "./portrait";
 import { ThemeToggle } from "./theme-toggle";
 import currentRead from "@/content/current-read.json";
@@ -39,20 +40,16 @@ export default function Page() {
         </div>
 
         <aside className="current-read" aria-labelledby="current-read-label">
-          <svg
-            className="current-read-mark"
-            viewBox="0 0 24 32"
-            aria-hidden="true"
-          >
-            <path
-              className="current-read-mark-outline"
-              d="M5 3.5 18.5 3 19 27.5 12.2 23.5 5.5 28Z"
+          <span className="current-read-cover-frame" aria-hidden="true">
+            <Image
+              className="current-read-cover"
+              src={currentRead.cover}
+              alt=""
+              width={264}
+              height={400}
+              priority
             />
-            <path
-              className="current-read-mark-lines"
-              d="m8.5 8 7-.3M8.5 11.5l5.5-.2"
-            />
-          </svg>
+          </span>
 
           <div className="current-read-copy">
             <p className="current-read-label" id="current-read-label">
