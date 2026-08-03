@@ -49,9 +49,6 @@ export function Portrait() {
         <span className="sr-only">Portrait of Suhail</span>
       </button>
 
-      <span className="portrait-hint" aria-hidden="true">
-        change portrait
-      </span>
     </div>
   );
 }

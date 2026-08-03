@@ -86,14 +86,14 @@ export function ThemeToggle() {
     >
       <span className="theme-toggle-thumb" aria-hidden="true" />
       <span className="theme-option theme-option-sun" aria-hidden="true">
-        <svg viewBox="0 0 20 20">
-          <circle cx="10" cy="10" r="3.25" />
-          <path d="M10 2.25v1.5M10 16.25v1.5M2.25 10h1.5M16.25 10h1.5M4.52 4.52l1.06 1.06M14.42 14.42l1.06 1.06M15.48 4.52l-1.06 1.06M5.58 14.42l-1.06 1.06" />
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3.5" />
+          <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.64 5.64l1.41 1.41M16.95 16.95l1.41 1.41M18.36 5.64l-1.41 1.41M7.05 16.95l-1.41 1.41" />
         </svg>
       </span>
       <span className="theme-option theme-option-moon" aria-hidden="true">
-        <svg viewBox="0 0 20 20">
-          <path d="M15.2 12.8A6.6 6.6 0 0 1 7.2 4.8 6.6 6.6 0 1 0 15.2 12.8Z" />
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
         </svg>
       </span>
     </button>
