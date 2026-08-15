@@ -6,7 +6,7 @@ export type Note = {
   paragraphs: string[];
 };
 
-// Add a note here and it will appear on /notes.
+// Add a note here and it will appear on /notes with its own static page.
 export const notes: Note[] = [];
 
 export function getNote(slug: string) {

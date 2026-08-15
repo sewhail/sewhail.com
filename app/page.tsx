@@ -25,8 +25,8 @@ export default function Page() {
         <div className="intro-copy">
           <p>
             This is my little space on the internet. I build software for a
-            living, try new technologies, read when I can, and keep notes I may
-            finish someday.
+            living, read when I can, and keep notes before the thought
+            disappears.
           </p>
         </div>
 

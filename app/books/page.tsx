@@ -23,13 +23,13 @@ export default function BooksPage() {
     <main className="page subpage">
       <header className="subpage-header">
         <h1>books<span aria-hidden="true">.</span></h1>
-        <p>what I am reading, and what stayed with me.</p>
+        <p>books I’m reading and books I’ve finished.</p>
       </header>
 
       <section className="books-section" aria-labelledby="currently-reading">
         <h2 id="currently-reading">currently reading</h2>
         {reading.length === 0 ? (
-          <p className="empty-copy">nothing here yet.</p>
+          <p className="empty-copy">between books.</p>
         ) : (
           <div className="book-list">
             {reading.map((book) => (
@@ -54,9 +54,9 @@ export default function BooksPage() {
       </section>
 
       <section className="books-section read-books" aria-labelledby="read">
-        <h2 id="read">read</h2>
+        <h2 id="read">finished</h2>
         {read.length === 0 ? (
-          <p className="empty-copy">nothing here yet.</p>
+          <p className="empty-copy">none listed yet.</p>
         ) : (
           <div className="book-list">
             {read.map((book) => (

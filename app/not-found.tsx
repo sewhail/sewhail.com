@@ -6,10 +6,10 @@ export default function NotFound() {
     <main className="not-found-page">
       <div className="not-found-content">
         <Image
-          src="/avatar-sketch.jpg"
+          src="/avatar-ink-plate.jpg"
           alt=""
-          width={88}
-          height={88}
+          width={480}
+          height={560}
           className="not-found-art"
           aria-hidden="true"
         />
