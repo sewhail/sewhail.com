@@ -4,6 +4,10 @@ import { useEffect, useRef, type MouseEvent } from "react";
 
 type Theme = "dark" | "light";
 
+const THEME_OVERRIDE_KEY = "theme-override";
+const LIGHT_START_HOUR = 7;
+const DARK_START_HOUR = 19;
+
 type ViewTransitionDocument = Document & {
   startViewTransition?: (update: () => void) => {
     ready: Promise<void>;
@@ -14,9 +18,50 @@ function getCurrentTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
+function getAutomaticTheme(date = new Date()): Theme {
+  const hour = date.getHours();
+  return hour >= LIGHT_START_HOUR && hour < DARK_START_HOUR
+    ? "light"
+    : "dark";
+}
+
+function getNextThemeBoundary(date = new Date()) {
+  const boundary = new Date(date);
+
+  if (date.getHours() < LIGHT_START_HOUR) {
+    boundary.setHours(LIGHT_START_HOUR, 0, 0, 0);
+  } else if (date.getHours() < DARK_START_HOUR) {
+    boundary.setHours(DARK_START_HOUR, 0, 0, 0);
+  } else {
+    boundary.setDate(boundary.getDate() + 1);
+    boundary.setHours(LIGHT_START_HOUR, 0, 0, 0);
+  }
+
+  return boundary;
+}
+
+function getThemeForNow(date = new Date()): Theme {
+  const savedOverride = localStorage.getItem(THEME_OVERRIDE_KEY);
+
+  if (!savedOverride) return getAutomaticTheme(date);
+
+  try {
+    const override = JSON.parse(savedOverride) as {
+      theme?: unknown;
+      expiresAt?: unknown;
+    };
+    const isValidTheme = override.theme === "light" || override.theme === "dark";
+    const isCurrent = Number(override.expiresAt) > date.getTime();
+
+    if (isValidTheme && isCurrent) return override.theme as Theme;
+  } catch {}
+
+  localStorage.removeItem(THEME_OVERRIDE_KEY);
+  return getAutomaticTheme(date);
+}
+
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
-  localStorage.setItem("theme", theme);
 
   const themeColor = document.querySelector('meta[name="theme-color"]');
   themeColor?.setAttribute(
@@ -29,24 +74,78 @@ export function ThemeToggle() {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   function updateLabel(theme: Theme) {
-    buttonRef.current?.setAttribute(
-      "aria-label",
-      theme === "light" ? "Switch to dark theme" : "Switch to light theme",
-    );
+    const nextTheme = theme === "light" ? "dark" : "light";
+    const boundary = getNextThemeBoundary();
+    const boundaryTime = new Intl.DateTimeFormat(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(boundary);
+    const label = `Switch to ${nextTheme} theme until ${boundaryTime}`;
+
+    buttonRef.current?.setAttribute("aria-label", label);
+    buttonRef.current?.setAttribute("title", label);
   }
 
   useEffect(() => {
-    updateLabel(getCurrentTheme());
+    let boundaryTimer: number | undefined;
+
+    function syncTheme() {
+      const theme = getThemeForNow();
+      applyTheme(theme);
+      updateLabel(theme);
+    }
+
+    function scheduleBoundary() {
+      window.clearTimeout(boundaryTimer);
+
+      const now = new Date();
+      const boundary = getNextThemeBoundary(now);
+      const delay = Math.max(0, boundary.getTime() - now.getTime() + 100);
+
+      boundaryTimer = window.setTimeout(() => {
+        localStorage.removeItem(THEME_OVERRIDE_KEY);
+        syncTheme();
+        scheduleBoundary();
+      }, delay);
+    }
+
+    function syncWhenVisible() {
+      if (document.visibilityState === "visible") {
+        syncTheme();
+        scheduleBoundary();
+      }
+    }
+
+    syncTheme();
+    scheduleBoundary();
+    document.addEventListener("visibilitychange", syncWhenVisible);
+    window.addEventListener("focus", syncWhenVisible);
+
+    return () => {
+      window.clearTimeout(boundaryTimer);
+      document.removeEventListener("visibilitychange", syncWhenVisible);
+      window.removeEventListener("focus", syncWhenVisible);
+    };
   }, []);
 
   function toggleTheme(event: MouseEvent<HTMLButtonElement>) {
     const nextTheme = getCurrentTheme() === "light" ? "dark" : "light";
+    const expiresAt = getNextThemeBoundary().getTime();
     const viewTransitionDocument = document as ViewTransitionDocument;
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    if (!viewTransitionDocument.startViewTransition || prefersReducedMotion) {
+    localStorage.setItem(
+      THEME_OVERRIDE_KEY,
+      JSON.stringify({ theme: nextTheme, expiresAt }),
+    );
+
+    if (
+      !viewTransitionDocument.startViewTransition ||
+      prefersReducedMotion ||
+      event.detail === 0
+    ) {
       applyTheme(nextTheme);
       updateLabel(nextTheme);
       return;
@@ -77,7 +176,7 @@ export function ThemeToggle() {
             ],
           },
           {
-            duration: 360,
+            duration: 240,
             easing: "cubic-bezier(0.22, 1, 0.36, 1)",
             pseudoElement: "::view-transition-new(root)",
           },

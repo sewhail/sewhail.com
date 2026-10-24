@@ -20,7 +20,11 @@ export async function generateMetadata({
   const note = getNote((await params).slug);
 
   return note
-    ? { title: `${note.title} — suhail.`, description: note.summary }
+    ? {
+        title: `${note.title} — suhail.`,
+        description: note.summary,
+        alternates: { canonical: `/notes/${note.slug}` },
+      }
     : {};
 }
 
@@ -30,7 +34,7 @@ export default async function NotePage({ params }: NotePageProps) {
   if (!note) notFound();
 
   return (
-    <main className="page subpage note-page">
+    <main id="main-content" tabIndex={-1} className="page subpage note-page">
       <header className="subpage-header">
         <h1>{note.title}<span aria-hidden="true">.</span></h1>
         <time dateTime={note.publishedAt}>{note.publishedAt}</time>

@@ -5,11 +5,12 @@ import { notes } from "@/content/notes";
 export const metadata: Metadata = {
   title: "notes — suhail.",
   description: "Notes and things worth remembering.",
+  alternates: { canonical: "/notes" },
 };
 
 export default function NotesPage() {
   return (
-    <main className="page subpage">
+    <main id="main-content" tabIndex={-1} className="page subpage">
       <header className="subpage-header">
         <h1>notes<span aria-hidden="true">.</span></h1>
         <p>things I would rather not forget.</p>

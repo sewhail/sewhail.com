@@ -2,7 +2,7 @@ import { Portrait } from "./portrait";
 
 export default function Page() {
   return (
-    <main className="page home-page">
+    <main id="main-content" tabIndex={-1} className="page home-page">
       <header className="header">
         <div className="bio-row">
           <Portrait />

@@ -16,11 +16,12 @@ const read = books.filter((book) => book.status === "read");
 export const metadata: Metadata = {
   title: "books — suhail.",
   description: "Books I am reading and books I have read.",
+  alternates: { canonical: "/books" },
 };
 
 export default function BooksPage() {
   return (
-    <main className="page subpage">
+    <main id="main-content" tabIndex={-1} className="page subpage">
       <header className="subpage-header">
         <h1>books<span aria-hidden="true">.</span></h1>
         <p>books I’m reading and books I’ve finished.</p>
