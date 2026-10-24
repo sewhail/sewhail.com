@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="not-found-page">
+    <main id="main-content" tabIndex={-1} className="not-found-page">
       <div className="not-found-content">
         <Image
           src="/avatar-ink-plate.jpg"

@@ -10,6 +10,7 @@ node_modules/
 
 # testing
 /coverage
+/.audit/
 
 # next.js
 .next/
@@ -22,6 +23,7 @@ out/
 .DS_Store
 *.pem
 /Photos/
+/portfolio/
 
 # debug
 npm-debug.log*

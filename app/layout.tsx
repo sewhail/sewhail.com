@@ -4,19 +4,38 @@ import { SiteNav } from './site-nav'
 
 const themeScript = `
   (() => {
+    const now = new Date();
+    const hour = now.getHours();
+    const automaticTheme = hour >= 7 && hour < 19 ? "light" : "dark";
+    const overrideKey = "theme-override";
+    let theme = automaticTheme;
+
     try {
-      const saved = localStorage.getItem("theme");
-      const theme =
-        saved === "light" || saved === "dark"
-          ? saved
-            : matchMedia("(prefers-color-scheme: light)").matches
-              ? "light"
-              : "dark";
-      document.documentElement.dataset.theme = theme;
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", theme === "light" ? "#f5ecd9" : "#1a1a18");
+      localStorage.removeItem("theme");
+
+      const savedOverride = localStorage.getItem(overrideKey);
+      if (savedOverride) {
+        try {
+          const override = JSON.parse(savedOverride);
+          const isValidTheme = override.theme === "light" || override.theme === "dark";
+          const isCurrent = Number(override.expiresAt) > now.getTime();
+
+          if (isValidTheme && isCurrent) {
+            theme = override.theme;
+          } else {
+            localStorage.removeItem(overrideKey);
+          }
+        } catch {
+          localStorage.removeItem(overrideKey);
+        }
+      }
     } catch {}
+
+    document.documentElement.dataset.theme = theme;
+    const themeColor = document.createElement("meta");
+    themeColor.name = "theme-color";
+    themeColor.content = theme === "light" ? "#f5ecd9" : "#1a1a18";
+    document.head.appendChild(themeColor);
   })();
 `;
 
@@ -59,7 +78,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#1a1a18" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
