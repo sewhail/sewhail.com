@@ -19,6 +19,9 @@ export function SiteNav() {
         skip to content
       </a>
       <div className="site-nav-shell">
+        <Link className="site-signature" href="/" aria-label="Suhail home">
+          s.
+        </Link>
         <nav className="site-nav" aria-label="Primary navigation">
           {links.map((link) => {
             const exact = pathname === link.href;

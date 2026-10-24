@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import booksData from "@/content/books.json";
+import books from "@/content/books.json";
 
-type Book = {
-  title: string;
-  author: string;
-  status: "reading" | "read";
-  cover?: string;
-};
-
-const books = booksData as Book[];
 const reading = books.filter((book) => book.status === "reading");
 const read = books.filter((book) => book.status === "read");
 
@@ -23,6 +15,7 @@ export default function BooksPage() {
   return (
     <main id="main-content" tabIndex={-1} className="page subpage">
       <header className="subpage-header">
+        <p className="eyebrow">The bookshelf</p>
         <h1>books<span aria-hidden="true">.</span></h1>
         <p>books I’m reading and books I’ve finished.</p>
       </header>

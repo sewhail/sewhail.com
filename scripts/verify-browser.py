@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 import subprocess
 import tempfile
 import threading
@@ -77,7 +78,7 @@ def verify(args):
         routes.append(f"/notes/{args.note_slug}")
     try:
         with sync_playwright() as playwright, local_browser(playwright) as browser:
-            for width, height in [(1440, 1000), (390, 844), (320, 740)]:
+            for width, height in [(1440, 1000), (1920, 1080), (768, 1024), (390, 844), (320, 740)]:
                 context = browser.new_context(
                     viewport={"width": width, "height": height},
                     reduced_motion="reduce",
@@ -92,6 +93,10 @@ def verify(args):
                     assert response.status == 200, (route, response.status)
                     expect(page.locator("main")).to_be_visible()
                     expect(page.locator("h1")).to_have_count(1)
+                    if route == "/":
+                        expect(page.locator("main")).to_contain_text(
+                            "This is my little space on the internet. I build software for a living, read when I can, and keep notes before the thought disappears."
+                        )
                     expect(page.locator('link[rel="canonical"]')).to_have_attribute(
                         "href", "https://sewhail.com" + (route if route != "/" else "")
                     )
@@ -99,9 +104,9 @@ def verify(args):
                     expect(page.locator(f'.site-nav a[aria-current="{current}"]')).to_have_attribute(
                         "href", "/notes" if current == "location" else route
                     )
-                    assert page.evaluate(
-                        "document.documentElement.scrollWidth <= window.innerWidth"
-                    ), f"Horizontal overflow at {width}px on {route}"
+                    for control in page.locator(".site-nav a, .theme-toggle").all():
+                        bounds = control.bounding_box()
+                        assert bounds and bounds["height"] >= 44, f"Small navigation target on {route} at {width}px"
                     for theme in ["light", "dark"]:
                         page.evaluate("""theme => {
                           localStorage.setItem('theme-override', JSON.stringify({
@@ -113,6 +118,9 @@ def verify(args):
                         expect(page.locator('meta[name="theme-color"]')).to_have_attribute(
                             "content", "#f5ecd9" if theme == "light" else "#1a1a18"
                         )
+                        assert page.evaluate(
+                            "document.documentElement.scrollWidth <= window.innerWidth"
+                        ), f"Horizontal overflow at {width}px on {route} in {theme} theme"
                         assert page.locator("img").evaluate_all(
                             "images => images.every(image => image.complete && image.naturalWidth > 0)"
                         ), f"Broken image on {route}"
@@ -121,6 +129,7 @@ def verify(args):
                     if not args.baseline:
                         page.keyboard.press("Tab")
                         expect(page.get_by_role("link", name="Skip to content")).to_be_focused()
+                        expect(page.get_by_role("link", name="Skip to content")).to_be_in_viewport()
                         page.keyboard.press("Enter")
                         expect(page.locator("main")).to_be_focused()
                     checks.append(f"{width}px {route}: layout, image, canonical, active navigation, both themes")
@@ -132,6 +141,20 @@ def verify(args):
                     page.keyboard.press("Enter")
                     expect(page.locator("main")).to_be_focused()
                     checks.append(f"{width}px: skip link moves keyboard focus to main")
+
+                    page.locator("main").get_by_role("link", name=re.compile(r"^Books", re.I)).click()
+                    expect(page).to_have_url(base + "/books")
+                    expect(page.get_by_role("heading", name="books", exact=True)).to_be_visible()
+                    page.goto(base, wait_until="networkidle")
+                    note_preview = page.locator("main").get_by_role("link", name=re.compile(r"^Notes", re.I))
+                    note_path = note_preview.get_attribute("href")
+                    assert note_path == "/notes" or note_path.startswith("/notes/")
+                    if args.note_slug:
+                        assert note_path == f"/notes/{args.note_slug}"
+                    note_preview.click()
+                    expect(page).to_have_url(base + note_path)
+                    expect(page.get_by_role("heading", name="nothing here.")).to_have_count(0)
+                    checks.append(f"{width}px: homepage book and note previews open their real destinations")
 
                 page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="books", exact=True).click()
                 expect(page).to_have_url(base + "/books")
