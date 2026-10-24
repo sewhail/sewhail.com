@@ -12,13 +12,17 @@ export default function NotesPage() {
   return (
     <main id="main-content" tabIndex={-1} className="page subpage">
       <header className="subpage-header">
+        <p className="eyebrow">The notebook</p>
         <h1>notes<span aria-hidden="true">.</span></h1>
         <p>things I would rather not forget.</p>
       </header>
 
       <section className="notes-section" aria-label="Notes">
         {notes.length === 0 ? (
-          <p className="empty-copy">nothing here yet.</p>
+          <div className="empty-notebook">
+            <p className="section-label">Notes</p>
+            <p className="empty-copy">nothing here yet.</p>
+          </div>
         ) : (
           <div className="note-list">
             {notes.map((note) => (
