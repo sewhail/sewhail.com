@@ -39,14 +39,18 @@ const themeScript = `
   })();
 `;
 
+const siteDescription = "Suhail, a software builder in Amsterdam. Books and notes.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://sewhail.com"),
   title: "suhail.",
+  description: siteDescription,
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "suhail.",
+    description: siteDescription,
     url: "/",
     siteName: "suhail.",
     type: "website",
@@ -63,6 +67,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "suhail.",
+    description: siteDescription,
     images: ["/social-card-art.jpg"],
   },
   icons: {
