@@ -95,8 +95,23 @@ def verify(args):
                     expect(page.locator("h1")).to_have_count(1)
                     if route == "/":
                         expect(page.locator("main")).to_contain_text(
-                            "This is my little space on the internet. I build software for a living, read when I can, and keep notes before the thought disappears."
+                            "I build software for a living and read when I can."
                         )
+                        expect(page.locator("main")).not_to_contain_text(
+                            re.compile(r"a little space on the internet", re.I)
+                        )
+                        for selector in ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']:
+                            expect(page.locator(selector)).to_have_attribute(
+                                "content", "Suhail, a software builder in Amsterdam. Books and notes."
+                            )
+                        identity = page.locator(".name")
+                        assert identity.evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 44
+                        portrait = page.locator(".portrait-control").bounding_box()
+                        assert portrait and portrait["width"] <= 56 and portrait["height"] <= 64
+                    for shell in page.locator(".site-nav-shell, main.page").all():
+                        bounds = shell.bounding_box()
+                        assert bounds and bounds["width"] <= 608.5, f"Wide reading column on {route} at {width}px"
+                        assert bounds["x"] >= 23.5, f"Narrow page gutter on {route} at {width}px"
                     expect(page.locator('link[rel="canonical"]')).to_have_attribute(
                         "href", "https://sewhail.com" + (route if route != "/" else "")
                     )
@@ -180,9 +195,20 @@ def verify(args):
                 response = page.goto(base + "/missing-page", wait_until="networkidle")
                 assert response.status == 404
                 expect(page.get_by_role("heading", name="nothing here.")).to_be_visible()
+                for theme in ["light", "dark"]:
+                    page.evaluate("""theme => {
+                      localStorage.setItem('theme-override', JSON.stringify({
+                        theme, expiresAt: Date.now() + 3600000
+                      }));
+                    }""", theme)
+                    page.reload(wait_until="networkidle")
+                    assert page.evaluate(
+                        "document.documentElement.scrollWidth <= window.innerWidth"
+                    ), f"Horizontal overflow at {width}px on 404 in {theme} theme"
+                    page.screenshot(path=str(evidence / f"{width}-404-{theme}.png"), full_page=True)
                 page.get_by_role("link", name="go home").click()
                 expect(page).to_have_url(base + "/")
-                checks.append(f"{width}px: 404 recovery returns home")
+                checks.append(f"{width}px: 404 layout in both themes and recovery returns home")
                 context.close()
                 print(f"Verified {width}px", flush=True)
             if not args.baseline:

@@ -15,15 +15,14 @@ export default function BooksPage() {
   return (
     <main id="main-content" tabIndex={-1} className="page subpage">
       <header className="subpage-header">
-        <p className="eyebrow">The bookshelf</p>
         <h1>books<span aria-hidden="true">.</span></h1>
-        <p>books I’m reading and books I’ve finished.</p>
+        <p>Books I&apos;m reading and books I&apos;ve finished.</p>
       </header>
 
       <section className="books-section" aria-labelledby="currently-reading">
         <h2 id="currently-reading">currently reading</h2>
         {reading.length === 0 ? (
-          <p className="empty-copy">between books.</p>
+          <p className="empty-copy">Between books.</p>
         ) : (
           <div className="book-list">
             {reading.map((book) => (
@@ -50,7 +49,7 @@ export default function BooksPage() {
       <section className="books-section read-books" aria-labelledby="read">
         <h2 id="read">finished</h2>
         {read.length === 0 ? (
-          <p className="empty-copy">none listed yet.</p>
+          <p className="empty-copy">None listed yet.</p>
         ) : (
           <div className="book-list">
             {read.map((book) => (

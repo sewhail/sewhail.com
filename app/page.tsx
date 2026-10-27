@@ -11,27 +11,19 @@ export default function Page() {
   return (
     <main id="main-content" tabIndex={-1} className="page home-page">
       <header className="home-heading">
+        <Portrait />
         <div>
-          <p className="eyebrow">A little space on the internet</p>
           <h1 className="name">
             suhail<span aria-hidden="true">.</span>
           </h1>
-        </div>
-        <div className="portrait-caption">
-          <Portrait />
-          <p>
-            amsterdam,<br />the netherlands
-          </p>
+          <p className="home-location">Amsterdam, the Netherlands</p>
         </div>
       </header>
 
       <section className="introduction" aria-label="Introduction">
-        <p className="section-label">About</p>
         <div className="intro-copy">
           <p>
-            This is my little space on the internet. I build software for a
-            living, read when I can, and keep notes before the thought
-            disappears.
+            I build software for a living and read when I can.
           </p>
           <nav className="links" aria-label="Contact links">
             <a href="https://github.com/sewhail" target="_blank" rel="noreferrer">
@@ -48,8 +40,7 @@ export default function Page() {
       </section>
 
       <section className="home-index" aria-label="Explore books and notes">
-        <p className="section-label">On this site</p>
-        <div className="discovery-grid">
+        <div className="discovery-list">
           <Link href="/books" className="discovery-link book-preview">
             <div className="discovery-heading">
               <h2>Books</h2>
@@ -66,7 +57,7 @@ export default function Page() {
                   />
                 ) : null}
                 <div>
-                  <p className="eyebrow">Currently reading</p>
+                  <p className="preview-status">Currently reading</p>
                   <h3>{currentBook.title}</h3>
                   <p className="book-author">{currentBook.author}</p>
                 </div>
@@ -86,8 +77,8 @@ export default function Page() {
             <p className="preview-description">
               {featuredNote ? featuredNote.title : "Things I would rather not forget."}
             </p>
-            <p className="eyebrow note-status">
-              {featuredNote ? featuredNote.publishedAt : "Nothing here yet."}
+            <p className="preview-status note-status">
+              {featuredNote ? featuredNote.publishedAt : "No notes published yet."}
             </p>
           </Link>
         </div>
