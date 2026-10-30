@@ -27,11 +27,14 @@ def local_browser(playwright):
         try:
             port_file = Path(profile) / "DevToolsActivePort"
             deadline = time.monotonic() + 15
-            while not port_file.exists():
+            while True:
+                port_lines = port_file.read_text().splitlines() if port_file.exists() else []
+                if port_lines:
+                    port = port_lines[0]
+                    break
                 if process.poll() is not None or time.monotonic() > deadline:
                     raise RuntimeError("Chrome did not expose its debugging port")
                 time.sleep(0.05)
-            port = port_file.read_text().splitlines()[0]
             yield playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{port}")
         finally:
             process.terminate()
@@ -268,6 +271,38 @@ def verify(args):
                 assert lamp.evaluate("element => getComputedStyle(element).transform") == 'none'
                 page.keyboard.up('Space')
                 checks.append("Rapid theme toggles settle with matching storage and no remaining animations; keyboard lamp press stays still")
+                arrow = page.locator('.discovery-heading > span')
+                for reduced in [False, True]:
+                    page.emulate_media(reduced_motion="reduce" if reduced else "no-preference")
+                    page.locator('.book-preview .discovery-link').hover()
+                    page.wait_for_function("document.getAnimations().length === 0")
+                    assert arrow.evaluate("element => getComputedStyle(element).transform") == (
+                        "none" if reduced else "matrix(1, 0, 0, 1, 2, -2)"
+                    )
+                    feedback = lamp.evaluate("""button => {
+                      const before = button.getAttribute('aria-pressed');
+                      button.click(); button.click(); button.click();
+                      const animations = button.querySelector('.lamp-cord').getAnimations();
+                      return {
+                        before,
+                        count: animations.length,
+                        frames: animations[0].effect.getKeyframes(),
+                        duration: animations[0].effect.getTiming().duration
+                      };
+                    }""")
+                    assert feedback['count'] == 1
+                    expect(lamp).to_have_attribute('aria-pressed', 'false' if feedback['before'] == 'true' else 'true')
+                    assert feedback['duration'] == (160 if reduced else 180)
+                    if reduced:
+                        assert all('transform' not in frame for frame in feedback['frames'])
+                        assert [frame['opacity'] for frame in feedback['frames']] == ['1', '0.65', '1']
+                    else:
+                        assert [frame['transform'] for frame in feedback['frames']] == [
+                            'translateY(0px)', 'translateY(2px)', 'translateY(0px)'
+                        ]
+                    page.wait_for_function("document.getAnimations().length === 0")
+                    assert page.locator('.lamp-cord').evaluate("element => getComputedStyle(element).transform") == 'none'
+                checks.append("Books arrow and lamp cord respect reduced motion; repeated lamp activations leave one short animation and settle")
                 context.close()
         assert not errors, f"Browser errors: {errors}"
         report = {"status": "passed", "checks": checks, "browser_errors": errors, "baseline": args.baseline}

@@ -422,6 +422,10 @@ main:focus {
   margin-bottom: 0.75rem;
 }
 
+.discovery-heading > span {
+  transition: transform 160ms var(--ease-out);
+}
+
 .discovery-heading h2 {
   font-size: 0.875rem;
   font-weight: 500;
@@ -453,6 +457,9 @@ main:focus {
   .discovery-link:hover .discovery-heading h2 {
     text-decoration: underline;
     text-underline-offset: 0.3em;
+  }
+  .discovery-link:hover .discovery-heading > span {
+    transform: translate(2px, -2px);
   }
 }
 
@@ -820,6 +827,7 @@ a.book-stack:focus-visible:active .book-stack-cover {
   .theme-icon,
   :root[data-theme="light"] .theme-icon,
   .book-stack .book-stack-cover,
+  .discovery-heading > span,
   .desk-lamp {
     transform: none !important;
   }
