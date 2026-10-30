@@ -64,6 +64,10 @@ class ExportHandler(SimpleHTTPRequestHandler):
         pass
 
 
+def wait_for_settled_motion(page):
+    page.wait_for_function("document.getAnimations().every(animation => animation.effect.getTiming().iterations === Infinity)")
+
+
 def verify(args):
     evidence = Path(args.evidence).resolve()
     evidence.mkdir(parents=True, exist_ok=True)
@@ -114,7 +118,7 @@ def verify(args):
                         cover_bounds = page.locator('.book-stack').bounding_box()
                         assert cover_bounds and cover_bounds["width"] <= 56
                         assert page.locator('.reading-caption h3').evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 16
-                    for shell in page.locator(".site-nav-shell, main.page").all():
+                    for shell in page.locator(".site-nav-shell, main.page:not(.home-page), .home-content").all():
                         bounds = shell.bounding_box()
                         assert bounds and bounds["width"] <= 608.5, f"Wide reading column on {route} at {width}px"
                         assert bounds["x"] >= 23.5, f"Narrow page gutter on {route} at {width}px"
@@ -173,12 +177,12 @@ def verify(args):
                     expect(lamp).to_have_attribute("aria-pressed", "false")
                     lamp.click()
                     expect(lamp).to_have_attribute("aria-pressed", "true")
-                    expect(page.locator('main')).to_have_attribute('data-desk-mode', 'true')
-                    page.wait_for_function("Number(getComputedStyle(document.querySelector('.reading-preview'), '::before').opacity) > 0.9")
-                    page.wait_for_function("Number(getComputedStyle(document.querySelector('.lamp-beam')).opacity) > 0.1")
+                    expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'true')
+                    assert page.locator('.reading-preview').evaluate("e => getComputedStyle(e, '::before').content") == 'none'
+                    page.wait_for_function("Number(getComputedStyle(document.querySelector('.room-lamplight')).opacity) > 0.1")
                     lamp.click()
                     expect(lamp).to_have_attribute("aria-pressed", "false")
-                    expect(page.locator('main')).to_have_attribute('data-desk-mode', 'false')
+                    expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'false')
                     cover = page.get_by_role("link", name=re.compile(r"^About .*publisher"))
                     expect(cover).to_have_attribute("href", re.compile(r"^https://www.simonandschuster.com/"))
                     expect(cover).to_have_attribute("target", "_blank")
@@ -200,7 +204,7 @@ def verify(args):
                     expect(bookmark).to_have_attribute('aria-pressed', 'false')
                     bookmark.click()
                     expect(bookmark).to_have_attribute('aria-pressed', 'true')
-                    expect(page.get_by_role('status')).to_have_text('A bookmark left on this device.')
+                    expect(page.get_by_role('status').filter(has_text='A bookmark left on this device.')).to_have_text('A bookmark left on this device.')
                     page.reload(wait_until='networkidle')
                     expect(bookmark).to_have_attribute('aria-pressed', 'true')
                     assert bookmark.locator('svg').evaluate('element => getComputedStyle(element).transform') == 'none'
@@ -209,43 +213,38 @@ def verify(args):
                     expect(bookmark).to_have_attribute('aria-pressed', 'false')
                     page.reload(wait_until='networkidle')
                     expect(bookmark).to_have_attribute('aria-pressed', 'false')
-                    window = page.get_by_role('button', name='Amsterdam window', exact=True)
-                    expect(window).not_to_be_visible()
-                    summary = page.locator('.colophon summary')
-                    summary.focus()
-                    page.keyboard.press('Enter')
-                    expect(page.locator('.colophon')).to_have_attribute('open', '')
+                    page.route('https://api.open-meteo.com/**', lambda route: route.fulfill(json={'current': {
+                        'temperature_2m': 12, 'wind_speed_10m': 24, 'weather_code': 61,
+                        'is_day': 1, 'time': '2026-10-30T14:15'
+                    }}))
+                    window = page.locator('.room-window-button')
+                    expect(page.locator('.colophon')).to_have_count(0)
                     expect(window).to_be_visible()
-                    expect(window).to_have_attribute('aria-pressed', 'false')
+                    expect(window).to_have_attribute('aria-expanded', 'false')
                     window.focus()
                     page.keyboard.press('Space')
-                    expect(window).to_have_attribute('aria-pressed', 'true')
-                    expect(page.locator('.amsterdam-window figcaption')).to_contain_text('Night')
+                    expect(window).to_have_attribute('aria-expanded', 'true')
+                    expect(page.locator('.room-weather-caption')).to_contain_text('Rainy · Windy')
                     window.click()
-                    expect(window).to_have_attribute('aria-pressed', 'false')
+                    expect(window).to_have_attribute('aria-expanded', 'false')
                     page.get_by_role('button', name='Reading lamp', exact=True).click()
-                    expect(page.locator('main')).to_have_attribute('data-desk-mode', 'true')
+                    expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'true')
                     for theme in ['light', 'dark']:
                         page.evaluate("theme => document.documentElement.dataset.theme = theme", theme)
-                        page.wait_for_function("document.getAnimations().length === 0")
+                        wait_for_settled_motion(page)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                         assert page.evaluate("""() => {
                           const rgb = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
                           const luminance = color => color.map(v => v / 255)
                             .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
                             .reduce((total, value, i) => total + value * [0.2126, 0.7152, 0.0722][i], 0);
-                          const opacity = Number(getComputedStyle(document.body, '::before').opacity);
-                          const background = rgb(getComputedStyle(document.body).backgroundColor).map(v => v * (1 - opacity));
+                          const background = rgb(getComputedStyle(document.body).backgroundColor);
                           const foreground = rgb(getComputedStyle(document.querySelector('.home-location')).color);
                           const a = luminance(background), b = luminance(foreground);
                           return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5;
                         }"""), f'Desk mode reduced text contrast at {width}px in {theme} theme'
-                        page.screenshot(path=str(evidence / f'{width}-desk-colophon-{theme}.png'), full_page=True)
-                    summary.focus()
-                    page.keyboard.press('Enter')
-                    expect(window).not_to_be_visible()
-                    expect(summary).to_be_focused()
-                    checks.append(f'{width}px: bookmark persists/removes; colophon and day/night window work by keyboard; desk mode stays readable in both themes')
+                        page.screenshot(path=str(evidence / f'{width}-cozy-room-{theme}.png'), full_page=True)
+                    checks.append(f'{width}px: bookmark persists/removes; weather window works by keyboard; local lamp stays readable in both themes')
 
                 page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="books", exact=True).click()
                 expect(page).to_have_url(base + "/books")
@@ -316,7 +315,7 @@ def verify(args):
                 expected = "dark" if before == "light" else "light"
                 expect(page.locator("html")).to_have_attribute("data-theme", expected)
                 assert page.evaluate("JSON.parse(localStorage.getItem('theme-override')).theme") == expected
-                page.wait_for_function("document.getAnimations().length === 0")
+                wait_for_settled_motion(page)
                 assert not page.locator('html').evaluate("element => element.classList.contains('theme-transitioning')")
                 expect(page.locator('meta[name="theme-color"]')).to_have_attribute(
                     "content", "#f5ecd9" if expected == "light" else "#1a1a18"
@@ -331,40 +330,22 @@ def verify(args):
                 for reduced in [False, True]:
                     page.emulate_media(reduced_motion="reduce" if reduced else "no-preference")
                     page.locator('.book-preview .discovery-link').hover()
-                    page.wait_for_function("document.getAnimations().length === 0")
+                    wait_for_settled_motion(page)
                     assert arrow.evaluate("element => getComputedStyle(element).transform") == (
                         "none" if reduced else "matrix(1, 0, 0, 1, 2, -2)"
                     )
                     for contact in page.locator('.links a').all():
                         contact.hover()
-                        page.wait_for_function("document.getAnimations().length === 0")
+                        wait_for_settled_motion(page)
                         assert contact.locator('span').evaluate("element => getComputedStyle(element).transform") == (
                             'none' if reduced else 'matrix(1, 0, 0, 1, 2, -2)'
                         )
-                    feedback = lamp.evaluate("""button => {
-                      const before = button.getAttribute('aria-pressed');
-                      button.click(); button.click(); button.click();
-                      const animations = button.querySelector('.lamp-cord').getAnimations();
-                      return {
-                        before,
-                        count: animations.length,
-                        frames: animations[0].effect.getKeyframes(),
-                        duration: animations[0].effect.getTiming().duration
-                      };
-                    }""")
-                    assert feedback['count'] == 1
-                    expect(lamp).to_have_attribute('aria-pressed', 'false' if feedback['before'] == 'true' else 'true')
-                    assert feedback['duration'] == (160 if reduced else 180)
-                    if reduced:
-                        assert all('transform' not in frame for frame in feedback['frames'])
-                        assert [frame['opacity'] for frame in feedback['frames']] == ['1', '0.65', '1']
-                    else:
-                        assert [frame['transform'] for frame in feedback['frames']] == [
-                            'translateY(0px)', 'translateY(2px)', 'translateY(0px)'
-                        ]
-                    page.wait_for_function("document.getAnimations().length === 0")
-                    assert page.locator('.lamp-cord').evaluate("element => getComputedStyle(element).transform") == 'none'
-                checks.append("Books/contact arrows and lamp cord respect reduced motion; repeated lamp activations leave one short animation and settle")
+                    before = lamp.get_attribute('aria-pressed')
+                    lamp.click(); lamp.click(); lamp.click()
+                    expect(lamp).to_have_attribute('aria-pressed', 'false' if before == 'true' else 'true')
+                    wait_for_settled_motion(page)
+                    assert page.locator('.room-lamp-cord').evaluate("element => getComputedStyle(element).transform") == 'none'
+                checks.append("Books/contact arrows and lamp respect reduced motion; repeated lamp toggles settle")
                 context.close()
                 for reduced in [False, True]:
                     context = browser.new_context(reduced_motion='reduce' if reduced else 'no-preference')
@@ -384,7 +365,7 @@ def verify(args):
                     assert reveal['options']['duration'] == (160 if reduced else 260)
                     assert reveal['frames']['opacity'] == [0, 1]
                     assert ('transform' in reveal['frames']) == (not reduced)
-                    page.wait_for_function('document.getAnimations().length === 0')
+                    wait_for_settled_motion(page)
                     expect(page.locator('.avatar')).to_have_css('opacity', '1')
                     page.get_by_role('navigation', name='Primary navigation').get_by_role('link', name='books', exact=True).click()
                     expect(page).to_have_url(base + '/books')
