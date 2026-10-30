@@ -1,0 +1,45 @@
+import Image from "next/image";
+
+type ReadingBook = {
+  title: string;
+  author: string;
+  cover?: string;
+  coverSource?: string;
+};
+
+export function ReadingPreview({ book }: { book: ReadingBook }) {
+  const cover = (
+    <>
+      <span className="book-stack-paper book-stack-paper-back" aria-hidden="true" />
+      <span className="book-stack-paper book-stack-paper-front" aria-hidden="true" />
+      <span className="book-stack-cover">
+        {book.cover ? (
+          <Image src={book.cover} alt="" width={264} height={400} />
+        ) : (
+          <span className="book-stack-fallback">{book.title}</span>
+        )}
+      </span>
+    </>
+  );
+
+  return (
+    <div className="reading-preview">
+      {book.coverSource ? (
+        <a
+          className="book-stack"
+          href={book.coverSource}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`About ${book.title} (publisher, opens in a new tab)`}
+        >
+          {cover}
+        </a>
+      ) : <span className="book-stack">{cover}</span>}
+      <div className="reading-caption">
+        <p className="preview-status">Currently reading</p>
+        <h3>{book.title}</h3>
+        <p className="book-author">{book.author}</p>
+      </div>
+    </div>
+  );
+}

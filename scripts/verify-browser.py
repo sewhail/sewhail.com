@@ -102,12 +102,15 @@ def verify(args):
                         )
                         for selector in ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']:
                             expect(page.locator(selector)).to_have_attribute(
-                                "content", "Suhail, a software builder in Amsterdam. Books and notes."
+                                "content", "Suhail, a software builder in Amsterdam. Software and books."
                             )
                         identity = page.locator(".name")
                         assert identity.evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 44
                         portrait = page.locator(".portrait-control").bounding_box()
                         assert portrait and portrait["width"] <= 56 and portrait["height"] <= 64
+                        cover_bounds = page.locator('.book-stack').bounding_box()
+                        assert cover_bounds and cover_bounds["width"] <= 56
+                        assert page.locator('.reading-caption h3').evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 16
                     for shell in page.locator(".site-nav-shell, main.page").all():
                         bounds = shell.bounding_box()
                         assert bounds and bounds["width"] <= 608.5, f"Wide reading column on {route} at {width}px"
@@ -115,10 +118,11 @@ def verify(args):
                     expect(page.locator('link[rel="canonical"]')).to_have_attribute(
                         "href", "https://sewhail.com" + (route if route != "/" else "")
                     )
-                    current = "location" if route.startswith("/notes/") else "page"
-                    expect(page.locator(f'.site-nav a[aria-current="{current}"]')).to_have_attribute(
-                        "href", "/notes" if current == "location" else route
-                    )
+                    expect(page.locator('.site-nav a[href="/notes"]')).to_have_count(0)
+                    if route.startswith("/notes"):
+                        expect(page.locator('.site-nav a[aria-current]')).to_have_count(0)
+                    else:
+                        expect(page.locator('.site-nav a[aria-current="page"]')).to_have_attribute("href", route)
                     for control in page.locator(".site-nav a, .theme-toggle").all():
                         bounds = control.bounding_box()
                         assert bounds and bounds["height"] >= 44, f"Small navigation target on {route} at {width}px"
@@ -161,22 +165,32 @@ def verify(args):
                     expect(page).to_have_url(base + "/books")
                     expect(page.get_by_role("heading", name="books", exact=True)).to_be_visible()
                     page.goto(base, wait_until="networkidle")
-                    note_preview = page.locator("main").get_by_role("link", name=re.compile(r"^Notes", re.I))
-                    note_path = note_preview.get_attribute("href")
-                    assert note_path == "/notes" or note_path.startswith("/notes/")
-                    if args.note_slug:
-                        assert note_path == f"/notes/{args.note_slug}"
-                    note_preview.click()
-                    expect(page).to_have_url(base + note_path)
-                    expect(page.get_by_role("heading", name="nothing here.")).to_have_count(0)
-                    checks.append(f"{width}px: homepage book and note previews open their real destinations")
+                    expect(page.locator('main a[href^="/notes"]')).to_have_count(0)
+                    lamp = page.get_by_role("button", name="Reading lamp", exact=True)
+                    expect(lamp).to_have_attribute("aria-pressed", "false")
+                    lamp.click()
+                    expect(lamp).to_have_attribute("aria-pressed", "true")
+                    page.wait_for_function("Number(getComputedStyle(document.querySelector('.lamp-beam')).opacity) > 0.1")
+                    lamp.click()
+                    expect(lamp).to_have_attribute("aria-pressed", "false")
+                    cover = page.get_by_role("link", name=re.compile(r"^About .*publisher"))
+                    expect(cover).to_have_attribute("href", re.compile(r"^https://www.simonandschuster.com/"))
+                    expect(cover).to_have_attribute("target", "_blank")
+                    cover.focus()
+                    expect(cover).to_be_focused()
+                    assert cover.bounding_box()["height"] >= 44
+                    lamp.focus()
+                    page.keyboard.press("Space")
+                    expect(lamp).to_have_attribute("aria-pressed", "true")
+                    cover.hover()
+                    assert page.locator('.book-stack-cover').evaluate("element => getComputedStyle(element).transform") == "none"
+                    assert page.locator('.theme-icon-sun').evaluate("element => getComputedStyle(element).transform") == "none"
+                    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+                    checks.append(f"{width}px: Notes hidden; publisher cover link is focusable; lamp works with pointer and keyboard")
 
                 page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="books", exact=True).click()
                 expect(page).to_have_url(base + "/books")
                 expect(page.get_by_role("heading", name="books", exact=True)).to_be_visible()
-                page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="notes", exact=True).click()
-                expect(page).to_have_url(base + "/notes")
-                expect(page.get_by_role("heading", name="notes", exact=True)).to_be_visible()
 
                 before = page.locator("html").get_attribute("data-theme")
                 expect(page.locator('meta[name="theme-color"]')).to_have_attribute(
@@ -237,12 +251,23 @@ def verify(args):
                 checks.append("Keyboard theme change is immediate without a view transition")
                 button.click()
                 expect(page.locator("html")).to_have_attribute("data-theme", before)
-                assert page.evaluate("window.transitionCount") == 1
-                page.wait_for_function("!document.documentElement.classList.contains('theme-transitioning')")
+                assert page.evaluate("window.transitionCount") == 0
+                for _ in range(3):
+                    button.click(delay=20)
+                expected = "dark" if before == "light" else "light"
+                expect(page.locator("html")).to_have_attribute("data-theme", expected)
+                assert page.evaluate("JSON.parse(localStorage.getItem('theme-override')).theme") == expected
+                page.wait_for_function("document.getAnimations().length === 0")
+                assert not page.locator('html').evaluate("element => element.classList.contains('theme-transitioning')")
                 expect(page.locator('meta[name="theme-color"]')).to_have_attribute(
-                    "content", "#f5ecd9" if before == "light" else "#1a1a18"
+                    "content", "#f5ecd9" if expected == "light" else "#1a1a18"
                 )
-                checks.append("Pointer theme transition completes and clears its animation state")
+                lamp = page.get_by_role('button', name='Reading lamp', exact=True)
+                lamp.focus()
+                page.keyboard.down('Space')
+                assert lamp.evaluate("element => getComputedStyle(element).transform") == 'none'
+                page.keyboard.up('Space')
+                checks.append("Rapid theme toggles settle with matching storage and no remaining animations; keyboard lamp press stays still")
                 context.close()
         assert not errors, f"Browser errors: {errors}"
         report = {"status": "passed", "checks": checks, "browser_errors": errors, "baseline": args.baseline}

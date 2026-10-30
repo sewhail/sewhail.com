@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef } from "react";
 
 type Theme = "dark" | "light";
 
 const THEME_OVERRIDE_KEY = "theme-override";
 const LIGHT_START_HOUR = 7;
 const DARK_START_HOUR = 19;
-
-type ViewTransitionDocument = Document & {
-  startViewTransition?: (update: () => void) => {
-    ready: Promise<void>;
-  };
-};
 
 function getCurrentTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
@@ -128,66 +122,16 @@ export function ThemeToggle() {
     };
   }, []);
 
-  function toggleTheme(event: MouseEvent<HTMLButtonElement>) {
+  function toggleTheme() {
     const nextTheme = getCurrentTheme() === "light" ? "dark" : "light";
     const expiresAt = getNextThemeBoundary().getTime();
-    const viewTransitionDocument = document as ViewTransitionDocument;
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
 
     localStorage.setItem(
       THEME_OVERRIDE_KEY,
       JSON.stringify({ theme: nextTheme, expiresAt }),
     );
-
-    if (
-      !viewTransitionDocument.startViewTransition ||
-      prefersReducedMotion ||
-      event.detail === 0
-    ) {
-      applyTheme(nextTheme);
-      updateLabel(nextTheme);
-      return;
-    }
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = bounds.left + bounds.width / 2;
-    const y = bounds.top + bounds.height / 2;
-    const radius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    );
-
-    document.documentElement.classList.add("theme-transitioning");
-
-    const transition = viewTransitionDocument.startViewTransition(() => {
-      applyTheme(nextTheme);
-      updateLabel(nextTheme);
-    });
-
-    transition.ready
-      .then(() => {
-        const animation = document.documentElement.animate(
-          {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${radius}px at ${x}px ${y}px)`,
-            ],
-          },
-          {
-            duration: 240,
-            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-            pseudoElement: "::view-transition-new(root)",
-          },
-        );
-
-        return animation.finished;
-      })
-      .catch(() => undefined)
-      .finally(() => {
-        document.documentElement.classList.remove("theme-transitioning");
-      });
+    applyTheme(nextTheme);
+    updateLabel(nextTheme);
   }
 
   return (

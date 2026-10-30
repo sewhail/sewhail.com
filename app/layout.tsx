@@ -39,7 +39,7 @@ const themeScript = `
   })();
 `;
 
-const siteDescription = "Suhail, a software builder in Amsterdam. Books and notes.";
+const siteDescription = "Suhail, a software builder in Amsterdam. Software and books.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sewhail.com"),
