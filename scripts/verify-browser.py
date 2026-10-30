@@ -179,6 +179,9 @@ def verify(args):
                     cover = page.get_by_role("link", name=re.compile(r"^About .*publisher"))
                     expect(cover).to_have_attribute("href", re.compile(r"^https://www.simonandschuster.com/"))
                     expect(cover).to_have_attribute("target", "_blank")
+                    publisher = page.get_by_role('link', name=re.compile(r'^Publisher'))
+                    expect(publisher).to_be_visible()
+                    expect(publisher).to_have_attribute('href', cover.get_attribute('href'))
                     cover.focus()
                     expect(cover).to_be_focused()
                     assert cover.bounding_box()["height"] >= 44
@@ -279,6 +282,12 @@ def verify(args):
                     assert arrow.evaluate("element => getComputedStyle(element).transform") == (
                         "none" if reduced else "matrix(1, 0, 0, 1, 2, -2)"
                     )
+                    for contact in page.locator('.links a').all():
+                        contact.hover()
+                        page.wait_for_function("document.getAnimations().length === 0")
+                        assert contact.locator('span').evaluate("element => getComputedStyle(element).transform") == (
+                            'none' if reduced else 'matrix(1, 0, 0, 1, 2, -2)'
+                        )
                     feedback = lamp.evaluate("""button => {
                       const before = button.getAttribute('aria-pressed');
                       button.click(); button.click(); button.click();
@@ -302,8 +311,46 @@ def verify(args):
                         ]
                     page.wait_for_function("document.getAnimations().length === 0")
                     assert page.locator('.lamp-cord').evaluate("element => getComputedStyle(element).transform") == 'none'
-                checks.append("Books arrow and lamp cord respect reduced motion; repeated lamp activations leave one short animation and settle")
+                checks.append("Books/contact arrows and lamp cord respect reduced motion; repeated lamp activations leave one short animation and settle")
                 context.close()
+                for reduced in [False, True]:
+                    context = browser.new_context(reduced_motion='reduce' if reduced else 'no-preference')
+                    page = context.new_page()
+                    page.on('pageerror', lambda error: errors.append(str(error)))
+                    page.add_init_script("""(() => {
+                      window.portraitAnimations = [];
+                      const animate = Element.prototype.animate;
+                      Element.prototype.animate = function(frames, options) {
+                        if (this.matches('.avatar')) window.portraitAnimations.push({frames, options});
+                        return animate.call(this, frames, options);
+                      };
+                    })();""")
+                    page.goto(base, wait_until='networkidle')
+                    page.wait_for_function('window.portraitAnimations.length === 1')
+                    reveal = page.evaluate('window.portraitAnimations[0]')
+                    assert reveal['options']['duration'] == (160 if reduced else 260)
+                    assert reveal['frames']['opacity'] == [0, 1]
+                    assert ('transform' in reveal['frames']) == (not reduced)
+                    page.wait_for_function('document.getAnimations().length === 0')
+                    expect(page.locator('.avatar')).to_have_css('opacity', '1')
+                    page.get_by_role('navigation', name='Primary navigation').get_by_role('link', name='books', exact=True).click()
+                    expect(page).to_have_url(base + '/books')
+                    page.get_by_role('navigation', name='Primary navigation').get_by_role('link', name='home', exact=True).click()
+                    expect(page).to_have_url(base + '/')
+                    expect(page.locator('.avatar')).to_be_visible()
+                    assert page.evaluate('window.portraitAnimations.length') == 1
+                    page.reload(wait_until='networkidle')
+                    assert page.evaluate('window.portraitAnimations.length') == 0
+                    expect(page.locator('.avatar')).to_have_css('opacity', '1')
+                    context.close()
+                context = browser.new_context(java_script_enabled=False)
+                page = context.new_page()
+                page.goto(base, wait_until='networkidle')
+                expect(page.locator('.avatar')).to_be_visible()
+                expect(page.locator('.avatar')).to_have_css('opacity', '1')
+                assert page.locator('.avatar').evaluate('image => image.complete && image.naturalWidth > 0')
+                context.close()
+                checks.append('Portrait reveals once per tab in both motion preferences, stays visible on return/reload, and works without JavaScript')
         assert not errors, f"Browser errors: {errors}"
         report = {"status": "passed", "checks": checks, "browser_errors": errors, "baseline": args.baseline}
         report_path.write_text(json.dumps(report, indent=2) + "\n")

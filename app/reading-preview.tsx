@@ -39,6 +39,12 @@ export function ReadingPreview({ book }: { book: ReadingBook }) {
         <p className="preview-status">Currently reading</p>
         <h3>{book.title}</h3>
         <p className="book-author">{book.author}</p>
+        {book.coverSource ? (
+          <a className="publisher-link" href={book.coverSource} target="_blank" rel="noreferrer">
+            Publisher <span aria-hidden="true">↗</span>
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        ) : null}
       </div>
     </div>
   );
