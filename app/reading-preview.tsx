@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { SiteBookmark } from "./site-bookmark";
 
 type ReadingBook = {
   title: string;
@@ -24,17 +25,20 @@ export function ReadingPreview({ book }: { book: ReadingBook }) {
 
   return (
     <div className="reading-preview">
-      {book.coverSource ? (
-        <a
-          className="book-stack"
-          href={book.coverSource}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`About ${book.title} (publisher, opens in a new tab)`}
-        >
-          {cover}
-        </a>
-      ) : <span className="book-stack">{cover}</span>}
+      <div className="reading-object">
+        {book.coverSource ? (
+          <a
+            className="book-stack"
+            href={book.coverSource}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`About ${book.title} (publisher, opens in a new tab)`}
+          >
+            {cover}
+          </a>
+        ) : <span className="book-stack">{cover}</span>}
+        <SiteBookmark />
+      </div>
       <div className="reading-caption">
         <p className="preview-status">Currently reading</p>
         <h3>{book.title}</h3>

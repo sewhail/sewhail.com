@@ -173,9 +173,12 @@ def verify(args):
                     expect(lamp).to_have_attribute("aria-pressed", "false")
                     lamp.click()
                     expect(lamp).to_have_attribute("aria-pressed", "true")
+                    expect(page.locator('main')).to_have_attribute('data-desk-mode', 'true')
+                    page.wait_for_function("Number(getComputedStyle(document.querySelector('.reading-preview'), '::before').opacity) > 0.9")
                     page.wait_for_function("Number(getComputedStyle(document.querySelector('.lamp-beam')).opacity) > 0.1")
                     lamp.click()
                     expect(lamp).to_have_attribute("aria-pressed", "false")
+                    expect(page.locator('main')).to_have_attribute('data-desk-mode', 'false')
                     cover = page.get_by_role("link", name=re.compile(r"^About .*publisher"))
                     expect(cover).to_have_attribute("href", re.compile(r"^https://www.simonandschuster.com/"))
                     expect(cover).to_have_attribute("target", "_blank")
@@ -193,6 +196,56 @@ def verify(args):
                     assert page.locator('.theme-icon-sun').evaluate("element => getComputedStyle(element).transform") == "none"
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
                     checks.append(f"{width}px: Notes hidden; publisher cover link is focusable; lamp works with pointer and keyboard")
+                    bookmark = page.get_by_role('button', name='Leave a bookmark on this site', exact=True)
+                    expect(bookmark).to_have_attribute('aria-pressed', 'false')
+                    bookmark.click()
+                    expect(bookmark).to_have_attribute('aria-pressed', 'true')
+                    expect(page.get_by_role('status')).to_have_text('A bookmark left on this device.')
+                    page.reload(wait_until='networkidle')
+                    expect(bookmark).to_have_attribute('aria-pressed', 'true')
+                    assert bookmark.locator('svg').evaluate('element => getComputedStyle(element).transform') == 'none'
+                    bookmark.focus()
+                    page.keyboard.press('Space')
+                    expect(bookmark).to_have_attribute('aria-pressed', 'false')
+                    page.reload(wait_until='networkidle')
+                    expect(bookmark).to_have_attribute('aria-pressed', 'false')
+                    window = page.get_by_role('button', name='Amsterdam window', exact=True)
+                    expect(window).not_to_be_visible()
+                    summary = page.locator('.colophon summary')
+                    summary.focus()
+                    page.keyboard.press('Enter')
+                    expect(page.locator('.colophon')).to_have_attribute('open', '')
+                    expect(window).to_be_visible()
+                    expect(window).to_have_attribute('aria-pressed', 'false')
+                    window.focus()
+                    page.keyboard.press('Space')
+                    expect(window).to_have_attribute('aria-pressed', 'true')
+                    expect(page.locator('.amsterdam-window figcaption')).to_contain_text('Night')
+                    window.click()
+                    expect(window).to_have_attribute('aria-pressed', 'false')
+                    page.get_by_role('button', name='Reading lamp', exact=True).click()
+                    expect(page.locator('main')).to_have_attribute('data-desk-mode', 'true')
+                    for theme in ['light', 'dark']:
+                        page.evaluate("theme => document.documentElement.dataset.theme = theme", theme)
+                        page.wait_for_function("document.getAnimations().length === 0")
+                        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                        assert page.evaluate("""() => {
+                          const rgb = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+                          const luminance = color => color.map(v => v / 255)
+                            .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+                            .reduce((total, value, i) => total + value * [0.2126, 0.7152, 0.0722][i], 0);
+                          const opacity = Number(getComputedStyle(document.body, '::before').opacity);
+                          const background = rgb(getComputedStyle(document.body).backgroundColor).map(v => v * (1 - opacity));
+                          const foreground = rgb(getComputedStyle(document.querySelector('.home-location')).color);
+                          const a = luminance(background), b = luminance(foreground);
+                          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5;
+                        }"""), f'Desk mode reduced text contrast at {width}px in {theme} theme'
+                        page.screenshot(path=str(evidence / f'{width}-desk-colophon-{theme}.png'), full_page=True)
+                    summary.focus()
+                    page.keyboard.press('Enter')
+                    expect(window).not_to_be_visible()
+                    expect(summary).to_be_focused()
+                    checks.append(f'{width}px: bookmark persists/removes; colophon and day/night window work by keyboard; desk mode stays readable in both themes')
 
                 page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="books", exact=True).click()
                 expect(page).to_have_url(base + "/books")
@@ -351,6 +404,31 @@ def verify(args):
                 assert page.locator('.avatar').evaluate('image => image.complete && image.naturalWidth > 0')
                 context.close()
                 checks.append('Portrait reveals once per tab in both motion preferences, stays visible on return/reload, and works without JavaScript')
+                context = browser.new_context()
+                page = context.new_page()
+                page.on('pageerror', lambda error: errors.append(str(error)))
+                page.goto(base, wait_until='networkidle')
+                bookmark = page.get_by_role('button', name='Leave a bookmark on this site', exact=True)
+                bookmark.click()
+                expect(bookmark).to_have_attribute('aria-pressed', 'true')
+                other = context.new_page()
+                other.goto(base, wait_until='networkidle')
+                other_bookmark = other.get_by_role('button', name='Leave a bookmark on this site', exact=True)
+                expect(other_bookmark).to_have_attribute('aria-pressed', 'true')
+                bookmark.click()
+                expect(other_bookmark).to_have_attribute('aria-pressed', 'false')
+                page.evaluate("""() => {
+                  const setItem = Storage.prototype.setItem;
+                  Storage.prototype.setItem = function(key, value) {
+                    if (key === 'reading-desk-bookmark') throw new DOMException('Storage unavailable', 'QuotaExceededError');
+                    return setItem.call(this, key, value);
+                  };
+                }""")
+                bookmark.click()
+                expect(bookmark).to_have_attribute('aria-pressed', 'false')
+                expect(page.get_by_role('status')).to_contain_text('Nothing was stored.')
+                context.close()
+                checks.append('Bookmark stays synchronized across tabs and reports failed storage without claiming it saved')
         assert not errors, f"Browser errors: {errors}"
         report = {"status": "passed", "checks": checks, "browser_errors": errors, "baseline": args.baseline}
         report_path.write_text(json.dumps(report, indent=2) + "\n")

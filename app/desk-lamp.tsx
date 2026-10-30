@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { useReadingDesk } from "./reading-desk";
 
 export function DeskLamp() {
-  const [on, setOn] = useState(false);
+  const { on, toggle } = useReadingDesk();
   const cordRef = useRef<SVGGElement>(null);
 
   function toggleLamp() {
-    setOn((previous) => !previous);
+    toggle();
     const cord = cordRef.current;
     if (!cord) return;
 
@@ -30,7 +31,7 @@ export function DeskLamp() {
       className="desk-lamp"
       aria-label="Reading lamp"
       aria-pressed={on}
-      title="A little light for reading"
+      title={on ? "Leave reading-desk mode" : "Light up the reading desk"}
       onClick={toggleLamp}
     >
       <svg viewBox="0 0 88 96" fill="none" aria-hidden="true">

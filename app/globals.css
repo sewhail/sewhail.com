@@ -125,6 +125,8 @@ html {
 }
 
 body {
+  position: relative;
+  isolation: isolate;
   min-height: 100svh;
   background: var(--background);
   color: var(--foreground);
@@ -132,6 +134,21 @@ body {
   font-size: 1rem;
   line-height: 1.7;
   text-rendering: optimizeLegibility;
+}
+
+body::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  content: "";
+  transition: opacity 200ms var(--ease-out);
+}
+
+body:has(.home-page[data-desk-mode="true"])::before {
+  opacity: 0.02;
 }
 
 ::selection {
@@ -166,7 +183,7 @@ a:active {
   }
 }
 
-a:focus-visible, button:focus-visible {
+a:focus-visible, button:focus-visible, summary:focus-visible {
   outline: 2px solid var(--strong);
   outline-offset: 4px;
   border-radius: 2px;
@@ -527,6 +544,64 @@ main:focus {
   align-items: center;
   gap: 1rem;
   padding: 0.25rem 0 1rem;
+  position: relative;
+  isolation: isolate;
+}
+
+.reading-preview::before {
+  position: absolute;
+  z-index: -1;
+  inset: -0.5rem;
+  border: 1px solid var(--reading-edge);
+  border-radius: 3px;
+  background: var(--background);
+  box-shadow: 0 0 1.5rem var(--reading-paper-hover);
+  opacity: 0;
+  pointer-events: none;
+  content: "";
+  transition: opacity 200ms var(--ease-out);
+}
+
+.home-page[data-desk-mode="true"] .reading-preview::before {
+  opacity: 1;
+}
+
+.reading-object {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.25rem;
+}
+
+.site-bookmark {
+  position: absolute;
+  top: -1.5rem;
+  right: -0.5rem;
+}
+
+.bookmark-control {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--reading-accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bookmark-control svg {
+  width: 0.875rem;
+  height: 1.125rem;
+  fill: var(--background);
+  stroke: currentColor;
+  stroke-width: 1.5;
+  transition: transform 160ms var(--ease-out);
+}
+
+.bookmark-control[aria-pressed="true"] svg {
+  fill: var(--reading-accent);
+  transform: translateY(3px);
 }
 
 .reading-caption {
@@ -542,6 +617,7 @@ main:focus {
 }
 
 .book-stack {
+  display: block;
   position: relative;
   flex-shrink: 0;
   width: 3.25rem;
@@ -609,6 +685,103 @@ a.book-stack:active .book-stack-cover {
 
 a.book-stack:focus-visible:active .book-stack-cover {
   transform: none;
+}
+
+.colophon {
+  margin-top: 2rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.colophon summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  min-height: 2.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.colophon summary::-webkit-details-marker {
+  display: none;
+}
+
+.colophon summary span::before {
+  content: "+";
+}
+
+.colophon[open] summary span::before {
+  content: "−";
+}
+
+.colophon-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem;
+  align-items: start;
+  gap: 1.5rem;
+  padding-block: 0.5rem 1rem;
+}
+
+.colophon h2 {
+  color: var(--subtle);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.colophon p {
+  margin-top: 0.75rem;
+  line-height: 1.8;
+}
+
+.window-control {
+  display: block;
+  width: 6rem;
+  height: 7rem;
+  margin-inline: auto;
+  border: 0;
+  background: transparent;
+  color: var(--reading-accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.window-control svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.window-night-sky, .window-moon {
+  opacity: 0;
+}
+
+.window-night-sky, .window-moon, .window-sun {
+  transition: opacity 200ms var(--ease-out);
+}
+
+.window-control[aria-pressed="true"] .window-night-sky,
+.window-control[aria-pressed="true"] .window-moon {
+  opacity: 1;
+}
+
+.window-control[aria-pressed="true"] .window-scene {
+  color: #eee8dc;
+}
+
+.window-control[aria-pressed="true"] .window-sun {
+  opacity: 0;
+}
+
+.amsterdam-window figcaption {
+  font-size: 0.6875rem;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.amsterdam-window figcaption span {
+  display: block;
 }
 
 .subpage-header {
@@ -818,6 +991,12 @@ a.book-stack:focus-visible:active .book-stack-cover {
     width: 3.5rem;
     height: 4.25rem;
   }
+  .colophon-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .amsterdam-window {
+    width: 7rem;
+  }
   .note-list article > header {
     display: block;
   }
@@ -839,10 +1018,13 @@ a.book-stack:focus-visible:active .book-stack-cover {
   .book-stack .book-stack-cover,
   .discovery-heading > span,
   .links a span,
+  .bookmark-control svg,
   .desk-lamp {
     transform: none !important;
   }
-  .theme-icon, .lamp-beam, .lamp-pool {
+  .theme-icon, .lamp-beam, .lamp-pool,
+  body::before, .reading-preview::before,
+  .window-night-sky, .window-moon, .window-sun {
     transition: opacity 160ms ease !important;
   }
 }

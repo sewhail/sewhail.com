@@ -3,12 +3,14 @@ import books from "@/content/books.json";
 import { ReadingPreview } from "./reading-preview";
 import { DeskLamp } from "./desk-lamp";
 import { Portrait } from "./portrait";
+import { ReadingDesk } from "./reading-desk";
+import { Colophon } from "./colophon";
 
 export default function Page() {
   const currentBook = books.find((book) => book.status === "reading");
 
   return (
-    <main id="main-content" tabIndex={-1} className="page home-page">
+    <ReadingDesk>
       <header className="home-heading">
         <Portrait />
         <div>
@@ -56,6 +58,7 @@ export default function Page() {
           </div>
         </div>
       </section>
-    </main>
+      <Colophon />
+    </ReadingDesk>
   );
 }
