@@ -591,6 +591,7 @@ body:has(.home-page) .site-nav-shell {
   isolation: isolate;
   max-width: 60rem;
   min-height: 36rem;
+  margin-bottom: 3.5rem;
   padding-block: 4rem 7rem;
 }
 
@@ -651,9 +652,10 @@ body:has(.home-page) .site-nav-shell {
 }
 
 .room-window {
-  top: 3%;
-  right: 9%;
-  width: 24%;
+  top: 6%;
+  right: 5%;
+  width: 34%;
+  z-index: 0;
 }
 
 .room-drawing {
@@ -661,6 +663,7 @@ body:has(.home-page) .site-nav-shell {
 }
 
 .room-desk {
+  z-index: 1;
   right: 6%;
   bottom: 14%;
   width: 37%;
@@ -706,7 +709,10 @@ body:has(.home-page) .site-nav-shell {
 .cozy-room[data-open="true"] .room-curtain-pleats { opacity: 0.1; }
 .cozy-room[data-open="true"] .room-curtain-gathered { opacity: 1; }
 .room-curtain-fabric { transform-box: fill-box; transform-origin: center top; }
-.room-casement { transform-box: fill-box; transition: transform 280ms var(--ease-out); }
+.room-casement { transform-box: fill-box; transition: transform 220ms var(--ease-out); }
+.cozy-room[data-open="true"] .room-casement { transition-duration: 260ms; transition-timing-function: var(--ease-drawer); }
+.room-glass-reflection { opacity: 0.12; transition: opacity 180ms ease; }
+.cozy-room[data-open="true"] .room-glass-reflection { opacity: 0; }
 .room-casement-left { transform-origin: left center; }
 .room-casement-right { transform-origin: right center; }
 .room-curtain-left { transform-origin: 49px 21px; }
@@ -753,9 +759,10 @@ body:has(.home-page) .site-nav-shell {
 .room-caption {
   position: absolute;
   z-index: 2;
-  top: calc(100% - 0.25rem);
-  left: -6%;
-  width: 112%;
+  right: 6%;
+  bottom: -3.5rem;
+  width: 37%;
+  min-height: 3.5rem;
   padding-top: 0.5rem;
   text-align: center;
   font-size: 0.6875rem;
@@ -904,6 +911,7 @@ body:has(.home-page) .site-nav-shell {
   }
   .home-page {
     min-height: 0;
+    margin-bottom: 0;
     padding-block: 3rem 3.5rem;
   }
   .home-content {
@@ -917,37 +925,37 @@ body:has(.home-page) .site-nav-shell {
   .room-stage {
     position: relative;
     display: grid;
+    grid-template-rows: auto auto minmax(4rem, auto);
     height: auto;
   }
   .cozy-room .room-architecture-wide { display: none; }
   .cozy-room .room-architecture-narrow {
     display: block;
     top: auto;
-    bottom: 0;
+    bottom: 4rem;
     height: 3rem;
   }
   .room-window {
     position: relative;
     top: auto;
     right: auto;
-    display: grid;
-    grid-template-rows: auto minmax(4rem, auto);
-    width: 70%;
+    grid-row: 1;
+    width: 90%;
     margin-inline: auto;
   }
-  .room-drawing { grid-row: 1; }
   .room-caption {
     position: static;
-    grid-row: 2;
-    width: calc(100% + 3rem);
-    margin-left: -1.5rem;
-    padding-top: 0.5rem;
+    grid-row: 3;
+    width: 100%;
+    padding-top: 0.75rem;
   }
   .room-desk {
     position: relative;
+    grid-row: 2;
     bottom: auto;
     right: auto;
     width: 100%;
+    margin-top: -2.5rem;
   }
 }
 

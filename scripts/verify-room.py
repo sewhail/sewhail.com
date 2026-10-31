@@ -107,14 +107,12 @@ def verify():
                 desk_bounds = page.locator('.room-desk').bounding_box()
                 assert chair_box['y'] + chair_box['height'] <= desk_bounds['y'] + desk_bounds['height'], "Chair feet leave the shared floor"
                 caption_box = page.locator('.room-caption').bounding_box()
+                assert caption_box['y'] >= desk_bounds['y'] + desk_bounds['height'], "Weather caption overlaps the furniture"
+                window_bounds = page.locator('.room-window').bounding_box()
                 shade_box = page.locator('.room-lamp-shade').bounding_box()
-                assert caption_box['y'] + caption_box['height'] + 4 <= shade_box['y'], "Weather caption collides with the lamp"
+                assert window_bounds['y'] + window_bounds['height'] > shade_box['y'], "Window does not sit behind the foreground lamp"
+                assert page.locator('.room-lamp-button').evaluate('e => { const r = e.getBoundingClientRect(); const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return e === hit || e.contains(hit); }'), "Window blocks the foreground lamp"
                 if width <= 900:
-                    caption_box = page.locator('.room-caption').bounding_box()
-                    drawing_box = page.locator('.room-drawing').bounding_box()
-                    desk_box = page.locator('.room-desk').bounding_box()
-                    assert caption_box['y'] >= drawing_box['y'] + drawing_box['height'], "Weather overlaps the window"
-                    assert caption_box['y'] + caption_box['height'] <= desk_box['y'], "Weather overlaps the lamp"
                     assert abs(room.bounding_box()['height'] - room_box['height']) < 1, "Opening weather shifts the room"
                 for theme in ["light", "dark"]:
                     set_theme(page, theme)

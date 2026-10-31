@@ -69,6 +69,7 @@ export function CozyRoom() {
                 <path d="M51 20h153v129H51Zm0 0 6 6m147-6-6 6M51 149l6-6m147 6-6-6" strokeOpacity="0.4" />
                 <path className="room-window-surround" d="M57 26q70-1 141 0v117q-70 1-141 0Z" />
                 <path d="M60 29h135v112H60Z" strokeOpacity="0.45" />
+                <path d="M57 26h141l-3 4H61v111l-4 2Z" fill="currentColor" fillOpacity="0.045" stroke="none" />
                 <g clipPath={`url(#${clipId})`}>
                   <path className="room-sky" d="M61 29h133v113H61z" stroke="none" />
                   {weather && condition?.kind !== "unknown" && <g className="room-weather-art">
@@ -95,6 +96,9 @@ export function CozyRoom() {
                     {condition?.kind === "fog" && <g className="room-fog"><path d="M54 91h137M65 102h133M55 115h131M70 127h132" /></g>}
                     {wind === "windy" && <g className="room-wind"><path d="M78 82h35q8 0 6-6m21 13h34q9 0 7-6M91 96h23" /></g>}
                   </g>}
+                </g>
+                <g className="room-glass-reflection" stroke="none" fill="currentColor">
+                  <path d="m68 35 18 1-18 38Zm15 0h7l-22 49v-8Zm51 1h17l-17 37Z" />
                 </g>
                 <g className="room-casement room-casement-left"><path d="m63 30 63 1 1 110-65-1Z" /><path d="m64 83 61 1m-7 7v10m-3-9h3" /></g>
                 <g className="room-casement room-casement-right"><path d="m129 31 63-1 1 110-65 1Z" /><path d="m130 84 61-1m-54 8v10m0-9h3" /></g>
@@ -124,18 +128,6 @@ export function CozyRoom() {
               </g>
             </svg>
             <button type="button" className="room-window-button" aria-label={open ? "Close the Amsterdam window" : "Open the window for live Amsterdam weather"} aria-expanded={open} aria-controls={captionId} onClick={() => setOpen(!open)} />
-          </div>
-          <div id={captionId} className="room-caption" hidden={!open}>
-            <div className="room-weather-caption">
-              <span className="room-weather-summary" role="status" aria-live="polite">
-                {failed ? "Weather unavailable." : weather ? <><span className="room-temperature">{Math.round(weather.temperature)}°</span>{` · ${condition?.label}${wind === "windy" ? " · Windy" : ""}`}</> : "Checking the sky…"}
-              </span>
-              {weather && <div className="room-weather-detail">
-                <span>{Math.round(weather.wind)} km/h · <time dateTime={weather.time}>{weather.time.slice(11, 16)}</time></span>
-                <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" aria-label="Weather data from Open-Meteo">Open-Meteo ↗</a>
-              </div>}
-              {failed && <button className="room-retry" type="button" onClick={() => { setFailed(false); setAttempt(attempt + 1); }}>Try again</button>}
-            </div>
           </div>
         </div>
         <div className="room-desk">
@@ -199,6 +191,18 @@ export function CozyRoom() {
             </svg>
           </div>
           <button type="button" className="room-lamp-button" aria-label="Reading lamp" aria-pressed={lit} onClick={() => setLit(!lit)} title={lit ? "Turn off the lamp" : "Turn on the lamp"} />
+        </div>
+        <div id={captionId} className="room-caption" hidden={!open}>
+          <div className="room-weather-caption">
+            <span className="room-weather-summary" role="status" aria-live="polite">
+              {failed ? "Weather unavailable." : weather ? <><span className="room-temperature">{Math.round(weather.temperature)}°</span>{` · ${condition?.label}${wind === "windy" ? " · Windy" : ""}`}</> : "Checking the sky…"}
+            </span>
+            {weather && <div className="room-weather-detail">
+              <span>{Math.round(weather.wind)} km/h · <time dateTime={weather.time}>{weather.time.slice(11, 16)}</time></span>
+              <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" aria-label="Weather data from Open-Meteo">Open-Meteo ↗</a>
+            </div>}
+            {failed && <button className="room-retry" type="button" onClick={() => { setFailed(false); setAttempt(attempt + 1); }}>Try again</button>}
+          </div>
         </div>
       </div>
     </div>
