@@ -27,11 +27,14 @@ def local_browser(playwright):
         try:
             port_file = Path(profile) / "DevToolsActivePort"
             deadline = time.monotonic() + 15
-            while not port_file.exists():
+            while True:
+                port_lines = port_file.read_text().splitlines() if port_file.exists() else []
+                if port_lines:
+                    port = port_lines[0]
+                    break
                 if process.poll() is not None or time.monotonic() > deadline:
                     raise RuntimeError("Chrome did not expose its debugging port")
                 time.sleep(0.05)
-            port = port_file.read_text().splitlines()[0]
             yield playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{port}")
         finally:
             process.terminate()
@@ -59,6 +62,10 @@ class ExportHandler(SimpleHTTPRequestHandler):
 
     def log_message(self, *_args):
         pass
+
+
+def wait_for_settled_motion(page):
+    page.wait_for_function("document.getAnimations().every(animation => animation.effect.getTiming().iterations === Infinity)")
 
 
 def verify(args):
@@ -102,23 +109,31 @@ def verify(args):
                         )
                         for selector in ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']:
                             expect(page.locator(selector)).to_have_attribute(
-                                "content", "Suhail, a software builder in Amsterdam. Books and notes."
+                                "content", "Suhail. Software and books."
                             )
                         identity = page.locator(".name")
                         assert identity.evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 44
                         portrait = page.locator(".portrait-control").bounding_box()
                         assert portrait and portrait["width"] <= 56 and portrait["height"] <= 64
-                    for shell in page.locator(".site-nav-shell, main.page").all():
+                        expect(page.locator('.portrait-control')).to_have_css('background-color', 'rgba(0, 0, 0, 0)')
+                        expect(page.locator('.avatar')).to_have_attribute('src', re.compile('avatar-ink-plate'))
+                        expect(page.locator('.avatar')).to_have_css('filter', 'none')
+                        cover_bounds = page.locator('.book-stack').bounding_box()
+                        assert cover_bounds and cover_bounds["width"] <= 56
+                        assert page.locator('.reading-caption h3').evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 16
+                    for shell in page.locator(".site-nav-shell, main.page:not(.home-page), .home-content").all():
                         bounds = shell.bounding_box()
-                        assert bounds and bounds["width"] <= 608.5, f"Wide reading column on {route} at {width}px"
+                        max_width = 960.5 if route == "/" and shell.evaluate("e => e.classList.contains('site-nav-shell')") else 608.5
+                        assert bounds and bounds["width"] <= max_width, f"Wide reading column on {route} at {width}px"
                         assert bounds["x"] >= 23.5, f"Narrow page gutter on {route} at {width}px"
                     expect(page.locator('link[rel="canonical"]')).to_have_attribute(
                         "href", "https://sewhail.com" + (route if route != "/" else "")
                     )
-                    current = "location" if route.startswith("/notes/") else "page"
-                    expect(page.locator(f'.site-nav a[aria-current="{current}"]')).to_have_attribute(
-                        "href", "/notes" if current == "location" else route
-                    )
+                    expect(page.locator('.site-nav a[href="/notes"]')).to_have_count(0)
+                    if route.startswith("/notes"):
+                        expect(page.locator('.site-nav a[aria-current]')).to_have_count(0)
+                    else:
+                        expect(page.locator('.site-nav a[aria-current="page"]')).to_have_attribute("href", route)
                     for control in page.locator(".site-nav a, .theme-toggle").all():
                         bounds = control.bounding_box()
                         assert bounds and bounds["height"] >= 44, f"Small navigation target on {route} at {width}px"
@@ -161,22 +176,66 @@ def verify(args):
                     expect(page).to_have_url(base + "/books")
                     expect(page.get_by_role("heading", name="books", exact=True)).to_be_visible()
                     page.goto(base, wait_until="networkidle")
-                    note_preview = page.locator("main").get_by_role("link", name=re.compile(r"^Notes", re.I))
-                    note_path = note_preview.get_attribute("href")
-                    assert note_path == "/notes" or note_path.startswith("/notes/")
-                    if args.note_slug:
-                        assert note_path == f"/notes/{args.note_slug}"
-                    note_preview.click()
-                    expect(page).to_have_url(base + note_path)
-                    expect(page.get_by_role("heading", name="nothing here.")).to_have_count(0)
-                    checks.append(f"{width}px: homepage book and note previews open their real destinations")
+                    expect(page.locator('main a[href^="/notes"]')).to_have_count(0)
+                    lamp = page.get_by_role("button", name="Reading lamp", exact=True)
+                    expect(lamp).to_have_attribute("aria-pressed", "false")
+                    lamp.click()
+                    expect(lamp).to_have_attribute("aria-pressed", "true")
+                    expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'true')
+                    assert page.locator('.reading-preview').evaluate("e => getComputedStyle(e, '::before').content") == 'none'
+                    page.wait_for_function("Number(getComputedStyle(document.querySelector('.room-lamplight')).opacity) > 0.1")
+                    lamp.click()
+                    expect(lamp).to_have_attribute("aria-pressed", "false")
+                    expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'false')
+                    cover = page.locator('.book-stack')
+                    expect(cover).to_be_visible()
+                    expect(page.locator('.reading-preview a, .reading-preview button')).to_have_count(0)
+                    expect(page.locator('.reading-preview')).not_to_contain_text('Publisher')
+                    lamp.focus()
+                    page.keyboard.press("Space")
+                    expect(lamp).to_have_attribute("aria-pressed", "true")
+                    cover.hover()
+                    assert page.locator('.book-stack-cover').evaluate("element => getComputedStyle(element).transform") == "none"
+                    assert page.locator('.theme-icon-sun').evaluate("element => getComputedStyle(element).transform") == "none"
+                    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+                    checks.append(f"{width}px: Notes hidden; bookmark and publisher info removed; lamp works with pointer and keyboard")
+                    page.reload(wait_until='networkidle')
+                    page.route('https://api.open-meteo.com/**', lambda route: route.fulfill(json={'current': {
+                        'temperature_2m': 12, 'wind_speed_10m': 24, 'weather_code': 61,
+                        'is_day': 1, 'time': '2026-10-30T14:15'
+                    }}))
+                    window = page.locator('.room-window-button')
+                    expect(page.locator('.colophon')).to_have_count(0)
+                    expect(window).to_be_visible()
+                    expect(window).to_have_attribute('aria-expanded', 'false')
+                    window.focus()
+                    page.keyboard.press('Space')
+                    expect(window).to_have_attribute('aria-expanded', 'true')
+                    expect(page.locator('.room-weather-caption')).to_contain_text('Rainy · Windy')
+                    window.click()
+                    expect(window).to_have_attribute('aria-expanded', 'false')
+                    page.get_by_role('button', name='Reading lamp', exact=True).click()
+                    expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'true')
+                    for theme in ['light', 'dark']:
+                        page.evaluate("theme => document.documentElement.dataset.theme = theme", theme)
+                        wait_for_settled_motion(page)
+                        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                        assert page.evaluate("""() => {
+                          const rgb = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+                          const luminance = color => color.map(v => v / 255)
+                            .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+                            .reduce((total, value, i) => total + value * [0.2126, 0.7152, 0.0722][i], 0);
+                          const background = rgb(getComputedStyle(document.body).backgroundColor);
+                          const foreground = rgb(getComputedStyle(document.querySelector('.home-location')).color);
+                          const a = luminance(background), b = luminance(foreground);
+                          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5;
+                        }"""), f'Desk mode reduced text contrast at {width}px in {theme} theme'
+                        page.screenshot(path=str(evidence / f'{width}-cozy-room-{theme}.png'), full_page=True)
+                    checks.append(f'{width}px: weather window works by keyboard; local lamp stays readable in both themes')
 
                 page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="books", exact=True).click()
                 expect(page).to_have_url(base + "/books")
                 expect(page.get_by_role("heading", name="books", exact=True)).to_be_visible()
-                page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="notes", exact=True).click()
-                expect(page).to_have_url(base + "/notes")
-                expect(page.get_by_role("heading", name="notes", exact=True)).to_be_visible()
 
                 before = page.locator("html").get_attribute("data-theme")
                 expect(page.locator('meta[name="theme-color"]')).to_have_attribute(
@@ -237,13 +296,82 @@ def verify(args):
                 checks.append("Keyboard theme change is immediate without a view transition")
                 button.click()
                 expect(page.locator("html")).to_have_attribute("data-theme", before)
-                assert page.evaluate("window.transitionCount") == 1
-                page.wait_for_function("!document.documentElement.classList.contains('theme-transitioning')")
+                assert page.evaluate("window.transitionCount") == 0
+                for _ in range(3):
+                    button.click(delay=20)
+                expected = "dark" if before == "light" else "light"
+                expect(page.locator("html")).to_have_attribute("data-theme", expected)
+                assert page.evaluate("JSON.parse(localStorage.getItem('theme-override')).theme") == expected
+                wait_for_settled_motion(page)
+                assert not page.locator('html').evaluate("element => element.classList.contains('theme-transitioning')")
                 expect(page.locator('meta[name="theme-color"]')).to_have_attribute(
-                    "content", "#f5ecd9" if before == "light" else "#1a1a18"
+                    "content", "#f5ecd9" if expected == "light" else "#1a1a18"
                 )
-                checks.append("Pointer theme transition completes and clears its animation state")
+                lamp = page.get_by_role('button', name='Reading lamp', exact=True)
+                lamp.focus()
+                page.keyboard.down('Space')
+                assert lamp.evaluate("element => getComputedStyle(element).transform") == 'none'
+                page.keyboard.up('Space')
+                checks.append("Rapid theme toggles settle with matching storage and no remaining animations; keyboard lamp press stays still")
+                arrow = page.locator('.discovery-heading > span')
+                for reduced in [False, True]:
+                    page.emulate_media(reduced_motion="reduce" if reduced else "no-preference")
+                    page.locator('.book-preview .discovery-link').hover()
+                    wait_for_settled_motion(page)
+                    assert arrow.evaluate("element => getComputedStyle(element).transform") == (
+                        "none" if reduced else "matrix(1, 0, 0, 1, 2, -2)"
+                    )
+                    for contact in page.locator('.links a').all():
+                        contact.hover()
+                        wait_for_settled_motion(page)
+                        assert contact.locator('span').evaluate("element => getComputedStyle(element).transform") == (
+                            'none' if reduced else 'matrix(1, 0, 0, 1, 2, -2)'
+                        )
+                    before = lamp.get_attribute('aria-pressed')
+                    lamp.click(); lamp.click(); lamp.click()
+                    expect(lamp).to_have_attribute('aria-pressed', 'false' if before == 'true' else 'true')
+                    wait_for_settled_motion(page)
+                    assert page.locator('.room-lamp-cord').evaluate("element => getComputedStyle(element).transform") == 'none'
+                checks.append("Books/contact arrows and lamp respect reduced motion; repeated lamp toggles settle")
                 context.close()
+                for reduced in [False, True]:
+                    context = browser.new_context(reduced_motion='reduce' if reduced else 'no-preference')
+                    page = context.new_page()
+                    page.on('pageerror', lambda error: errors.append(str(error)))
+                    page.add_init_script("""(() => {
+                      window.portraitAnimations = [];
+                      const animate = Element.prototype.animate;
+                      Element.prototype.animate = function(frames, options) {
+                        if (this.matches('.avatar')) window.portraitAnimations.push({frames, options});
+                        return animate.call(this, frames, options);
+                      };
+                    })();""")
+                    page.goto(base, wait_until='networkidle')
+                    page.wait_for_function('window.portraitAnimations.length === 1')
+                    reveal = page.evaluate('window.portraitAnimations[0]')
+                    assert reveal['options']['duration'] == (160 if reduced else 260)
+                    assert reveal['frames']['opacity'] == [0, 1]
+                    assert ('transform' in reveal['frames']) == (not reduced)
+                    wait_for_settled_motion(page)
+                    expect(page.locator('.avatar')).to_have_css('opacity', '1')
+                    page.get_by_role('navigation', name='Primary navigation').get_by_role('link', name='books', exact=True).click()
+                    expect(page).to_have_url(base + '/books')
+                    page.get_by_role('navigation', name='Primary navigation').get_by_role('link', name='home', exact=True).click()
+                    expect(page).to_have_url(base + '/')
+                    expect(page.locator('.avatar')).to_be_visible()
+                    assert page.evaluate('window.portraitAnimations.length') == 1
+                    page.reload(wait_until='networkidle')
+                    assert page.evaluate('window.portraitAnimations.length') == 0
+                    expect(page.locator('.avatar')).to_have_css('opacity', '1')
+                    context.close()
+                context = browser.new_context(java_script_enabled=False)
+                page = context.new_page()
+                page.goto(base, wait_until='networkidle')
+                expect(page.locator('.avatar')).to_be_visible()
+                expect(page.locator('.avatar')).to_have_css('opacity', '1')
+                assert page.locator('.avatar').evaluate('image => image.complete && image.naturalWidth > 0')
+                context.close()
+                checks.append('Portrait reveals once per tab in both motion preferences, stays visible on return/reload, and works without JavaScript')
         assert not errors, f"Browser errors: {errors}"
         report = {"status": "passed", "checks": checks, "browser_errors": errors, "baseline": args.baseline}
         report_path.write_text(json.dumps(report, indent=2) + "\n")

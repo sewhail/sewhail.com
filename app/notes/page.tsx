@@ -4,7 +4,7 @@ import { notes } from "@/content/notes";
 
 export const metadata: Metadata = {
   title: "notes — suhail.",
-  description: "Notes and things worth remembering.",
+  description: "Notes by Suhail.",
   alternates: { canonical: "/notes" },
 };
 
