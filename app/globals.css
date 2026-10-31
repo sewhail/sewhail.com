@@ -20,6 +20,7 @@
   color-scheme: dark;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --background: #1a1a18;
   --room-ink: #f5ecd9;
   --foreground: #d4d4d4;
@@ -578,16 +579,16 @@ main:focus {
 }
 
 body:has(.home-page) .site-nav-shell {
-  max-width: 64rem;
+  max-width: 60rem;
 }
 
 /* Text and illustration share one wall, with furniture below the reading area. */
 .home-page {
   position: relative;
   isolation: isolate;
-  max-width: 64rem;
-  min-height: 42.5rem;
-  padding-block: 6rem 9rem;
+  max-width: 60rem;
+  min-height: 36rem;
+  padding-block: 4rem 7rem;
 }
 
 .home-content {
@@ -635,7 +636,7 @@ body:has(.home-page) .site-nav-shell {
   position: absolute;
   inset: 0;
   height: 100%;
-  opacity: 0.22;
+  opacity: 0.16;
   mask-image: linear-gradient(to right, transparent, #000 8%, #000 96%, transparent);
 }
 
@@ -647,9 +648,9 @@ body:has(.home-page) .site-nav-shell {
 }
 
 .room-window {
-  top: 7%;
-  right: 8%;
-  width: 26%;
+  top: 3%;
+  right: 9%;
+  width: 24%;
 }
 
 .room-drawing {
@@ -657,9 +658,9 @@ body:has(.home-page) .site-nav-shell {
 }
 
 .room-desk {
-  right: 3%;
+  right: 6%;
   bottom: 14%;
-  width: 41%;
+  width: 37%;
 }
 
 .room-plant {
@@ -679,11 +680,13 @@ body:has(.home-page) .site-nav-shell {
   fill-opacity: 0.06;
 }
 
+.room-window-reveal { fill: currentColor; fill-opacity: 0.035; }
 .room-sky { fill-opacity: 0.025; }
 .cozy-room[data-night="true"] .room-sky { fill-opacity: 0.12; }
 .room-weather-art { color: inherit; }
 .room-moon { fill-opacity: 0.3; }
-.room-curtain { transition: transform 280ms var(--ease-out); }
+.room-curtain { transition: transform 220ms var(--ease-out); }
+.cozy-room[data-open="true"] .room-curtain { transition-duration: 280ms; transition-timing-function: var(--ease-drawer); }
 .room-curtain-fabric path + path { opacity: 0.35; }
 .room-curtain-fabric { transform-box: fill-box; transform-origin: center top; }
 .room-casement { transform-box: fill-box; transition: transform 280ms var(--ease-out); }
@@ -691,10 +694,12 @@ body:has(.home-page) .site-nav-shell {
 .room-casement-right { transform-origin: right center; }
 .room-curtain-left { transform-origin: 49px 21px; }
 .room-curtain-right { transform-origin: 206px 21px; }
-.cozy-room[data-open="true"] .room-curtain-left { transform: translateX(-20px) scaleX(0.45); }
-.cozy-room[data-open="true"] .room-curtain-right { transform: translateX(20px) scaleX(0.45); }
-.cozy-room[data-open="true"] .room-casement-left { transform: skewY(10deg) scaleX(0.18); }
-.cozy-room[data-open="true"] .room-casement-right { transform: skewY(-10deg) scaleX(0.18); }
+.cozy-room[data-open="true"] .room-curtain-left { transform: scaleX(0.32); }
+.cozy-room[data-open="true"] .room-curtain-right { transform: scaleX(0.32); }
+.cozy-room[data-open="true"] .room-casement { transition-delay: 40ms; }
+.cozy-room:has(.room-window-button:focus-visible) :is(.room-curtain, .room-casement) { transition: none; }
+.cozy-room[data-open="true"] .room-casement-left { transform: skewY(5deg) scaleX(0.28); }
+.cozy-room[data-open="true"] .room-casement-right { transform: skewY(-5deg) scaleX(0.28); }
 .room-lamplight { fill: #dcb36c; opacity: 0; transition: opacity 200ms var(--ease-out); }
 .cozy-room[data-lit="true"] .room-lamplight { opacity: 0.24; }
 .cozy-room[data-lit="true"] .room-lamp-shade { fill: #c39b58; fill-opacity: 0.3; }
@@ -731,17 +736,30 @@ body:has(.home-page) .site-nav-shell {
 .room-caption {
   position: absolute;
   z-index: 2;
-  top: calc(100% - 0.75rem);
+  top: calc(100% - 0.25rem);
   left: -6%;
   width: 112%;
-  padding-top: 0.125rem;
+  padding-top: 0.5rem;
   text-align: center;
   font-size: 0.6875rem;
   line-height: 1.4;
 }
-.room-weather-caption { color: var(--subtle); }
-.room-weather-detail { display: block; color: var(--muted); font-size: 0.625rem; margin-top: 0.1rem; }
-.room-weather-caption > span { display: block; width: fit-content; max-width: 100%; margin-inline: auto; pointer-events: auto; }
+.room-weather-caption { max-width: 16rem; margin-inline: auto; color: var(--subtle); }
+.room-weather-summary { display: block; font-size: 0.75rem; line-height: 1.6; pointer-events: auto; }
+.room-temperature { color: var(--strong); font-variant-numeric: tabular-nums; }
+.room-weather-detail {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.125rem 0.75rem;
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.625rem;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+.room-weather-detail > span { white-space: nowrap; }
+.room-weather-detail a { color: var(--muted); }
 .room-caption a, .room-retry { pointer-events: auto; }
 .room-weather-caption:has(.room-retry) { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 .room-weather-caption:has(.room-retry) > span { margin-inline: 0; }
@@ -753,9 +771,9 @@ body:has(.home-page) .site-nav-shell {
 .room-steam { opacity: 0.75; animation: room-steam-settle 7s var(--ease-in-out) -2s infinite; }
 .room-steam-wisp { animation: room-steam-rise 4s linear -1s infinite; }
 .room-steam-wisp + .room-steam-wisp { animation-duration: 4.8s; animation-delay: -3s; }
-.room-curtain-fabric { animation: room-curtain-rest 6.5s var(--ease-in-out) -1.8s infinite; }
-.room-curtain-right .room-curtain-fabric { animation-duration: 7.5s; animation-delay: -4s; }
-.cozy-room[data-open="true"] .room-curtain-fabric { animation-name: room-curtain-breathe; }
+.room-curtain-fabric { animation: none; }
+.cozy-room[data-open="true"] .room-curtain-fabric { animation: room-curtain-breathe 6.5s var(--ease-in-out) -1.8s infinite; }
+.cozy-room[data-open="true"] .room-curtain-right .room-curtain-fabric { animation-duration: 7.5s; animation-delay: -4s; }
 .cozy-room[data-open="true"][data-wind="breezy"] .room-curtain-fabric { animation-duration: 5.5s; }
 .cozy-room[data-open="true"][data-wind="windy"] .room-leaves { animation-name: room-leaf-gust; animation-duration: 5.5s; }
 .cozy-room[data-open="true"][data-wind="windy"] .room-curtain-fabric { animation-name: room-curtain-gust; animation-duration: 5s; }
@@ -801,18 +819,14 @@ body:has(.home-page) .site-nav-shell {
   0%, 100% { transform: rotate(-2.5deg); }
   47% { transform: rotate(2.5deg); }
 }
-@keyframes room-curtain-rest {
-  0%, 100% { transform: skewX(-0.8deg); }
-  48% { transform: skewX(1deg); }
-}
 @keyframes room-curtain-breathe {
-  0%, 100% { transform: skewX(-2deg); }
-  48% { transform: skewX(2.5deg); }
+  0%, 100% { transform: skewX(-0.6deg); }
+  48% { transform: skewX(0.8deg); }
 }
 @keyframes room-curtain-gust {
-  0%, 100% { transform: skewX(-3deg); }
-  42% { transform: skewX(5deg); }
-  73% { transform: skewX(0.8deg); }
+  0%, 100% { transform: skewX(-1deg); }
+  42% { transform: skewX(1.6deg); }
+  73% { transform: skewX(0.4deg); }
 }
 @keyframes room-steam-settle {
   0%, 100% { transform: translateX(-0.2px); }
@@ -880,14 +894,44 @@ body:has(.home-page) .site-nav-shell {
   }
   .cozy-room {
     position: relative;
-    width: min(100%, 24rem);
-    aspect-ratio: 400 / 520;
+    width: min(100%, 19rem);
     margin: 3rem auto 0;
   }
+  .room-stage {
+    position: relative;
+    display: grid;
+    height: auto;
+  }
   .cozy-room .room-architecture-wide { display: none; }
-  .cozy-room .room-architecture-narrow { display: block; }
-  .room-window { top: 0; right: 15%; width: 70%; }
-  .room-desk { bottom: 4%; right: 0; width: 100%; }
+  .cozy-room .room-architecture-narrow {
+    display: block;
+    top: auto;
+    bottom: 0;
+    height: 3rem;
+  }
+  .room-window {
+    position: relative;
+    top: auto;
+    right: auto;
+    display: grid;
+    grid-template-rows: auto minmax(4rem, auto);
+    width: 70%;
+    margin-inline: auto;
+  }
+  .room-drawing { grid-row: 1; }
+  .room-caption {
+    position: static;
+    grid-row: 2;
+    width: calc(100% + 3rem);
+    margin-left: -1.5rem;
+    padding-top: 0.5rem;
+  }
+  .room-desk {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    width: 100%;
+  }
 }
 
 .subpage-header {
@@ -1094,7 +1138,7 @@ body:has(.home-page) .site-nav-shell {
     min-width: 0;
   }
   .cozy-room {
-    max-width: 22rem;
+    max-width: 18rem;
     margin-top: 2.5rem;
   }
   .note-list article > header {

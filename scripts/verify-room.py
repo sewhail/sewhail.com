@@ -99,6 +99,16 @@ def verify():
                 expect(page.locator(".room-weather-caption")).to_contain_text("12° · Rainy · Windy")
                 expect(page.locator(".room-rain")).to_have_count(1)
                 expect(page.locator(".room-wind")).to_have_count(1)
+                caption_box = page.locator('.room-caption').bounding_box()
+                shade_box = page.locator('.room-lamp-shade').bounding_box()
+                assert caption_box['y'] + caption_box['height'] + 4 <= shade_box['y'], "Weather caption collides with the lamp"
+                if width <= 900:
+                    caption_box = page.locator('.room-caption').bounding_box()
+                    drawing_box = page.locator('.room-drawing').bounding_box()
+                    desk_box = page.locator('.room-desk').bounding_box()
+                    assert caption_box['y'] >= drawing_box['y'] + drawing_box['height'], "Weather overlaps the window"
+                    assert caption_box['y'] + caption_box['height'] <= desk_box['y'], "Weather overlaps the lamp"
+                    assert abs(room.bounding_box()['height'] - room_box['height']) < 1, "Opening weather shifts the room"
                 for theme in ["light", "dark"]:
                     set_theme(page, theme)
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
@@ -115,6 +125,15 @@ def verify():
             page.goto(f"http://127.0.0.1:{server.server_port}")
             expect(page.locator(".cozy-room")).to_have_attribute("data-open", "false")
             assert page.locator(".room-steam").evaluate("e => e.getAnimations({subtree:true}).some(a => a.playState === 'running')")
+            window_control = page.locator('.room-window-button')
+            window_control.click()
+            page.wait_for_function("Math.abs(new DOMMatrix(getComputedStyle(document.querySelector('.room-curtain-left')).transform).a - 0.32) < 0.001")
+            window_control.click()
+            window_control.click()
+            expect(page.locator('.cozy-room')).to_have_attribute('data-open', 'true')
+            page.wait_for_function("Math.abs(new DOMMatrix(getComputedStyle(document.querySelector('.room-curtain-right')).transform).a - 0.32) < 0.001")
+            window_control.click()
+            page.wait_for_function("getComputedStyle(document.querySelector('.room-curtain-left')).transform === 'none'")
             page.unroute("https://api.open-meteo.com/**")
             for code, selector in [(0, ".room-sun"), (3, ".room-clouds"), (45, ".room-clouds"), (73, ".room-snow"), (95, ".room-rain")]:
                 page.route("https://api.open-meteo.com/**", lambda route, request, code=code: route.fulfill(json=payload(code, 5)))
