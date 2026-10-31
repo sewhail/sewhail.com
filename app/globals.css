@@ -577,48 +577,36 @@ main:focus {
   font-family: var(--font-editorial);
 }
 
+body:has(.home-page) .site-nav-shell {
+  max-width: 64rem;
+}
+
 .home-page {
-  position: relative;
-  isolation: isolate;
-  width: 100%;
-  max-width: none;
-  min-height: max(46rem, calc(100svh - 4.75rem));
-  padding: 0;
-  overflow: clip;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+  align-items: center;
+  gap: 4rem;
+  max-width: 64rem;
+  padding-block: 3rem 5rem;
 }
 
 .home-content {
-  position: relative;
-  z-index: 1;
-  width: calc(100% - 3rem);
-  max-width: 38rem;
-  margin-inline: auto;
-  padding-block: 3.5rem 5rem;
-  pointer-events: none;
-}
-
-/* Keep quiet areas of the text layout transparent to the room's controls. */
-.home-content :is(.portrait-control, .name, .home-location, .intro-copy > p,
-  .links a, .discovery-link, .reading-object, .reading-caption, .preview-description) {
-  pointer-events: auto;
+  min-width: 0;
 }
 
 .cozy-room {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 400 / 620;
   color: var(--room-ink);
   pointer-events: none;
 }
 
 .room-stage {
   position: absolute;
-  top: 1rem;
-  left: 0;
-  right: 0;
-  width: min(100%, 58rem);
-  height: 42rem;
-  margin-inline: auto;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .cozy-room svg {
@@ -647,7 +635,8 @@ main:focus {
   mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 }
 
-.cozy-room .room-architecture-narrow { display: none; }
+.cozy-room .room-architecture-wide { display: none; }
+.cozy-room .room-architecture-narrow { display: block; }
 
 .room-window, .room-desk, .room-plant, .room-picture {
   position: absolute;
@@ -655,8 +644,8 @@ main:focus {
 
 .room-window {
   top: 0;
-  right: 6rem;
-  width: 16.25rem;
+  left: 15%;
+  width: 70%;
 }
 
 .room-drawing {
@@ -665,8 +654,8 @@ main:focus {
 
 .room-desk {
   right: 0;
-  top: 20rem;
-  width: 25rem;
+  top: 54%;
+  width: 100%;
 }
 
 .room-plant {
@@ -677,9 +666,9 @@ main:focus {
 }
 
 .room-picture {
-  top: 10rem;
-  left: 33rem;
-  width: 2rem;
+  top: 35%;
+  left: 6%;
+  width: 8%;
 }
 
 .room-window-surround, .room-sill, .room-lamp-base,
@@ -879,26 +868,19 @@ main:focus {
   55% { opacity: 0.6; }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
+  body:has(.home-page) .site-nav-shell,
   .home-page {
-    min-height: 0;
-    /* Reserve exactly the centered stage's 400:620 aspect ratio. */
-    padding-bottom: min(40.3rem, calc(155vw - 3.1rem));
+    max-width: 38rem;
   }
-  .home-content { padding-bottom: 1.5rem; }
+  .home-page {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+  }
   .cozy-room {
-    top: auto;
-    width: min(calc(100% - 2rem), 26rem);
-    height: auto;
+    width: min(100%, 22rem);
     margin-inline: auto;
-    aspect-ratio: 400 / 620;
   }
-  .room-stage { top: 0; width: 100%; height: 100%; }
-  .cozy-room .room-architecture-wide { display: none; }
-  .cozy-room .room-architecture-narrow { display: block; }
-  .room-window { top: 0; right: auto; left: 15%; width: 70%; }
-  .room-desk { top: 54%; right: 0; width: 100%; }
-  .room-picture { top: 35%; left: 6%; width: 8%; }
 }
 
 .subpage-header {
@@ -1105,10 +1087,10 @@ main:focus {
     min-width: 0;
   }
   .home-page {
-    padding: 0 0 min(40.3rem, calc(155vw - 3.1rem));
+    gap: 2.5rem;
   }
-  .home-content {
-    padding-block: 2.5rem 1.5rem;
+  .cozy-room {
+    max-width: 20rem;
   }
   .note-list article > header {
     display: block;

@@ -9,7 +9,6 @@ export default function Page() {
 
   return (
     <main id="main-content" tabIndex={-1} className="page home-page">
-      <CozyRoom />
       <div className="home-content">
         <header className="home-heading">
           <Portrait />
@@ -58,6 +57,7 @@ export default function Page() {
           </div>
         </section>
       </div>
+      <CozyRoom />
     </main>
   );
 }

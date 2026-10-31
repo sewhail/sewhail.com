@@ -42,17 +42,19 @@ def verify():
                 expect(page.locator(".colophon")).to_have_count(0)
                 room = page.locator(".cozy-room")
                 expect(room).to_have_attribute("data-open", "false")
-                assert room.evaluate("e => getComputedStyle(e).position") == "absolute"
+                assert room.evaluate("e => getComputedStyle(e).position") == "relative"
                 assert page.locator(".home-heading .cozy-room").count() == 0
                 content_box = page.locator(".home-content").bounding_box()
                 room_box = room.bounding_box()
-                if width > 1000:
-                    window_box = page.locator('.room-window').bounding_box()
-                    desk_box = page.locator('.room-desk').bounding_box()
+                if width > 900:
                     content_right = content_box['x'] + content_box['width']
-                    assert window_box['x'] < content_right and desk_box['x'] < content_right, "Room is still stranded outside the page composition"
+                    assert room_box['x'] >= content_right + 32, "Room overlaps the text column"
                 else:
-                    assert room_box["y"] >= content_box["y"] + content_box["height"] - 1, "Room interrupts the mobile text layout"
+                    assert room_box["y"] >= content_box["y"] + content_box["height"] + 32, "Room interrupts the mobile text layout"
+                main_box = page.locator('.home-page').bounding_box()
+                nav_box = page.locator('.site-nav-shell').bounding_box()
+                assert abs(main_box['x'] - nav_box['x']) < 1, "Navigation and page gutters are misaligned"
+                assert abs(main_box['width'] - nav_box['width']) < 1, "Navigation and page widths differ"
                 assert page.locator(".introduction").evaluate("e => getComputedStyle(e).marginTop") == "28px"
                 for theme, ink in [("light", "rgb(26, 26, 24)"), ("dark", "rgb(245, 236, 217)")]:
                     set_theme(page, theme)
