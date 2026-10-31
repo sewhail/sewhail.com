@@ -26,11 +26,11 @@ export function Portrait() {
   return (
     <div className="portrait-control">
       <Image
-        src="/avatar-ink-plate.jpg"
+        src="/avatar-ink-cameo.png"
         alt="Ink portrait of Suhail"
         width={480}
         height={560}
-        className="avatar avatar-ink-plate"
+        className="avatar"
         priority
         onLoad={(event) => revealPortrait(event.currentTarget)}
       />

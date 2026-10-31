@@ -21,6 +21,8 @@ def set_theme(page, theme):
     if page.locator("html").get_attribute("data-theme") != theme:
         page.locator(".theme-toggle").click()
     expect(page.locator("html")).to_have_attribute("data-theme", theme)
+    expect(page.locator("body")).to_have_css("background-color", "rgb(245, 236, 217)" if theme == "light" else "rgb(26, 26, 24)")
+    expect(page.locator('.site-nav a[aria-current]')).to_have_css("color", "rgb(36, 32, 25)" if theme == "light" else "rgb(232, 232, 228)")
 
 
 def verify():
@@ -60,7 +62,7 @@ def verify():
                 expect(window).to_have_attribute("aria-expanded", "false")
                 window.focus()
                 expect(window).to_have_attribute("aria-expanded", "false")
-                assert page.locator(".room-steam").evaluate("e => getComputedStyle(e).animationName") == "none"
+                assert page.locator(".room-steam").evaluate("e => e.getAnimations({subtree:true}).length") == 0
                 for link in page.locator(".links a, .discovery-link, a.book-stack").all():
                     link.scroll_into_view_if_needed()
                     assert link.evaluate("""e => {
@@ -99,7 +101,7 @@ def verify():
             page.route("https://api.open-meteo.com/**", lambda route: route.fulfill(json=payload()))
             page.goto(f"http://127.0.0.1:{server.server_port}")
             expect(page.locator(".cozy-room")).to_have_attribute("data-open", "false")
-            assert page.locator(".room-steam").evaluate("e => getComputedStyle(e).animationName") != "none"
+            assert page.locator(".room-steam").evaluate("e => e.getAnimations({subtree:true}).some(a => a.playState === 'running')")
             page.unroute("https://api.open-meteo.com/**")
             for code, selector in [(0, ".room-sun"), (3, ".room-clouds"), (45, ".room-clouds"), (73, ".room-snow"), (95, ".room-rain")]:
                 page.route("https://api.open-meteo.com/**", lambda route, request, code=code: route.fulfill(json=payload(code, 5)))
@@ -112,7 +114,7 @@ def verify():
             page.route("https://api.open-meteo.com/**", lambda route: route.fulfill(status=503, body="unavailable"))
             page.reload()
             page.locator(".room-window-button").click()
-            expect(page.locator(".room-weather-caption")).to_contain_text("out of reach")
+            expect(page.locator(".room-weather-caption")).to_contain_text("Weather unavailable.")
             page.unroute("https://api.open-meteo.com/**")
             page.route("https://api.open-meteo.com/**", lambda route: route.fulfill(json=payload(0, 8, 0)))
             page.get_by_role("button", name="Try again").click()
@@ -122,7 +124,7 @@ def verify():
             page.route("https://api.open-meteo.com/**", lambda route: route.fulfill(json={"current": {"weather_code": 73}}))
             page.reload()
             page.locator(".room-window-button").click()
-            expect(page.locator(".room-weather-caption")).to_contain_text("out of reach")
+            expect(page.locator(".room-weather-caption")).to_contain_text("Weather unavailable.")
             expect(page.locator(".room-snow")).to_have_count(0)
             assert not errors, errors
             context.close()

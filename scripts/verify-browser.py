@@ -115,6 +115,8 @@ def verify(args):
                         assert identity.evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 44
                         portrait = page.locator(".portrait-control").bounding_box()
                         assert portrait and portrait["width"] <= 56 and portrait["height"] <= 64
+                        expect(page.locator('.portrait-control')).to_have_css('background-color', 'rgba(0, 0, 0, 0)')
+                        expect(page.locator('.avatar')).to_have_attribute('src', re.compile('avatar-ink-cameo'))
                         cover_bounds = page.locator('.book-stack').bounding_box()
                         assert cover_bounds and cover_bounds["width"] <= 56
                         assert page.locator('.reading-caption h3').evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 16
@@ -183,15 +185,10 @@ def verify(args):
                     lamp.click()
                     expect(lamp).to_have_attribute("aria-pressed", "false")
                     expect(page.locator('.cozy-room')).to_have_attribute('data-lit', 'false')
-                    cover = page.get_by_role("link", name=re.compile(r"^About .*publisher"))
-                    expect(cover).to_have_attribute("href", re.compile(r"^https://www.simonandschuster.com/"))
-                    expect(cover).to_have_attribute("target", "_blank")
-                    publisher = page.get_by_role('link', name=re.compile(r'^Publisher'))
-                    expect(publisher).to_be_visible()
-                    expect(publisher).to_have_attribute('href', cover.get_attribute('href'))
-                    cover.focus()
-                    expect(cover).to_be_focused()
-                    assert cover.bounding_box()["height"] >= 44
+                    cover = page.locator('.book-stack')
+                    expect(cover).to_be_visible()
+                    expect(page.locator('.reading-preview a, .reading-preview button')).to_have_count(0)
+                    expect(page.locator('.reading-preview')).not_to_contain_text('Publisher')
                     lamp.focus()
                     page.keyboard.press("Space")
                     expect(lamp).to_have_attribute("aria-pressed", "true")
@@ -199,20 +196,8 @@ def verify(args):
                     assert page.locator('.book-stack-cover').evaluate("element => getComputedStyle(element).transform") == "none"
                     assert page.locator('.theme-icon-sun').evaluate("element => getComputedStyle(element).transform") == "none"
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
-                    checks.append(f"{width}px: Notes hidden; publisher cover link is focusable; lamp works with pointer and keyboard")
-                    bookmark = page.get_by_role('button', name='Leave a bookmark on this site', exact=True)
-                    expect(bookmark).to_have_attribute('aria-pressed', 'false')
-                    bookmark.click()
-                    expect(bookmark).to_have_attribute('aria-pressed', 'true')
-                    expect(page.get_by_role('status').filter(has_text='A bookmark left on this device.')).to_have_text('A bookmark left on this device.')
+                    checks.append(f"{width}px: Notes hidden; bookmark and publisher info removed; lamp works with pointer and keyboard")
                     page.reload(wait_until='networkidle')
-                    expect(bookmark).to_have_attribute('aria-pressed', 'true')
-                    assert bookmark.locator('svg').evaluate('element => getComputedStyle(element).transform') == 'none'
-                    bookmark.focus()
-                    page.keyboard.press('Space')
-                    expect(bookmark).to_have_attribute('aria-pressed', 'false')
-                    page.reload(wait_until='networkidle')
-                    expect(bookmark).to_have_attribute('aria-pressed', 'false')
                     page.route('https://api.open-meteo.com/**', lambda route: route.fulfill(json={'current': {
                         'temperature_2m': 12, 'wind_speed_10m': 24, 'weather_code': 61,
                         'is_day': 1, 'time': '2026-10-30T14:15'
@@ -244,7 +229,7 @@ def verify(args):
                           return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5;
                         }"""), f'Desk mode reduced text contrast at {width}px in {theme} theme'
                         page.screenshot(path=str(evidence / f'{width}-cozy-room-{theme}.png'), full_page=True)
-                    checks.append(f'{width}px: bookmark persists/removes; weather window works by keyboard; local lamp stays readable in both themes')
+                    checks.append(f'{width}px: weather window works by keyboard; local lamp stays readable in both themes')
 
                 page.get_by_role("navigation", name="Primary navigation").get_by_role("link", name="books", exact=True).click()
                 expect(page).to_have_url(base + "/books")
@@ -385,31 +370,6 @@ def verify(args):
                 assert page.locator('.avatar').evaluate('image => image.complete && image.naturalWidth > 0')
                 context.close()
                 checks.append('Portrait reveals once per tab in both motion preferences, stays visible on return/reload, and works without JavaScript')
-                context = browser.new_context()
-                page = context.new_page()
-                page.on('pageerror', lambda error: errors.append(str(error)))
-                page.goto(base, wait_until='networkidle')
-                bookmark = page.get_by_role('button', name='Leave a bookmark on this site', exact=True)
-                bookmark.click()
-                expect(bookmark).to_have_attribute('aria-pressed', 'true')
-                other = context.new_page()
-                other.goto(base, wait_until='networkidle')
-                other_bookmark = other.get_by_role('button', name='Leave a bookmark on this site', exact=True)
-                expect(other_bookmark).to_have_attribute('aria-pressed', 'true')
-                bookmark.click()
-                expect(other_bookmark).to_have_attribute('aria-pressed', 'false')
-                page.evaluate("""() => {
-                  const setItem = Storage.prototype.setItem;
-                  Storage.prototype.setItem = function(key, value) {
-                    if (key === 'reading-desk-bookmark') throw new DOMException('Storage unavailable', 'QuotaExceededError');
-                    return setItem.call(this, key, value);
-                  };
-                }""")
-                bookmark.click()
-                expect(bookmark).to_have_attribute('aria-pressed', 'false')
-                expect(page.get_by_role('status')).to_contain_text('Nothing was stored.')
-                context.close()
-                checks.append('Bookmark stays synchronized across tabs and reports failed storage without claiming it saved')
         assert not errors, f"Browser errors: {errors}"
         report = {"status": "passed", "checks": checks, "browser_errors": errors, "baseline": args.baseline}
         report_path.write_text(json.dumps(report, indent=2) + "\n")
