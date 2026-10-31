@@ -51,7 +51,7 @@ export function CozyRoom() {
           <g stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
             <path d="M0 574H944l80 44M0 584H941l83 46" />
             <path d="M944 0v574" opacity="0.6" />
-            <path d="m262 584-185 96m398-96-115 96m331-96-39 96m211-96 28 96M0 630h1024" opacity="0.55" />
+            <path d="m262 584-196 96m409-96-118 96m334-96-40 96m212-96 23 96M0 620h1024M0 666h1024" opacity="0.55" />
           </g>
         </svg>
         <svg className="room-architecture room-architecture-narrow" viewBox="0 0 400 48" preserveAspectRatio="none" fill="none" aria-hidden="true">
@@ -105,12 +105,20 @@ export function CozyRoom() {
                 <circle cx="214" cy="18" r="2" fill="currentColor" stroke="none" />
                 <g className="room-curtain room-curtain-left"><g className="room-curtain-fabric">
                   <path d="M49 22q9-4 18 0 10-4 19 0 10-4 19 0 11-4 19 0-4 30-3 62 0 29 2 55-6 8-13 2-7-5-14 0-6 6-13 0-7-5-14 0-10 5-20-1 5-31 4-59 0-31-4-59Z" />
-                  <path d="M62 28q5 47 0 90l-1 15m20-104q3 28 1 54m-1 11-1 39m20-105q-3 47 0 105m13-103q-4 36-2 71" fill="none" />
+                  <path className="room-curtain-pleats" d="M62 28q5 47 0 90l-1 15m20-104q3 28 1 54m-1 11-1 39m20-105q-3 47 0 105m13-103q-4 36-2 71" fill="none" />
+                  <g className="room-curtain-gathered" stroke="none">
+                    <path d="M57 24q9 46 1 112l10 3q6-60-2-114Zm28 0q7 53 1 113l9 2q3-65-4-115Zm22 1q5 42 0 110l7 2q4-55-2-112Z" fill="currentColor" fillOpacity="0.12" />
+                    <path d="M64 27q9 54 1 108m26-108q6 52 1 109m19-108q4 47 0 105" fill="none" stroke="currentColor" strokeOpacity="0.5" />
+                  </g>
                   <path d="M56 23v-7m21 6v-6m21 6v-6m18 6v-6" fill="none" />
                 </g></g>
                 <g className="room-curtain room-curtain-right"><g className="room-curtain-fabric">
                   <path d="M130 22q10-4 19 0 9-4 19 0 9-4 19 0 10-4 19 0-5 31-4 61 0 30 4 57-10 6-19 1-7-5-14 0-7 6-14 0-7-5-13 0-8 6-14-2 3-30 2-59 0-30-4-58Z" />
-                  <path d="M143 29q4 36 2 73m0 11-1 20m18-104q-2 49 0 105m19-105q-5 39-1 80l1 24m13-104q-3 19-2 38" fill="none" />
+                  <path className="room-curtain-pleats" d="M143 29q4 36 2 73m0 11-1 20m18-104q-2 49 0 105m19-105q-5 39-1 80l1 24m13-104q-3 19-2 38" fill="none" />
+                  <g className="room-curtain-gathered" stroke="none">
+                    <path d="M138 25q6 49 2 111l8 3q5-61-3-115Zm24-1q-5 56 0 113l10 2q-6-64-3-114Zm25 1q-6 43-1 110l9 3q-5-57 0-113Z" fill="currentColor" fillOpacity="0.12" />
+                    <path d="M143 28q6 49 1 106m23-107q-4 56 1 109m24-107q-5 42 0 105" fill="none" stroke="currentColor" strokeOpacity="0.5" />
+                  </g>
                   <path d="M138 22v-6m20 6v-6m20 6v-6m20 7v-7" fill="none" />
                 </g></g>
               </g>
@@ -133,10 +141,31 @@ export function CozyRoom() {
         <div className="room-desk">
           <svg viewBox="75 87 175 115" fill="none" aria-hidden="true">
             <g stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+              <g className="room-daylight" stroke="none">
+                <path d="M153 89h43l37 108H96Z" />
+                <path d="m153 89 17 108m8-108 29 108M130 144h84" fill="none" stroke="var(--background)" strokeWidth="2" />
+              </g>
               <ellipse cx="159" cy="197" rx="77" ry="3" fill="currentColor" fillOpacity="0.045" stroke="none" />
+              <g className="room-contact-shadows" fill="currentColor" fillOpacity="0.1" stroke="none">
+                <ellipse cx="95" cy="197" rx="6" ry="1.2" />
+                <ellipse cx="230" cy="197" rx="6" ry="1.2" />
+                <ellipse cx="119" cy="197" rx="16" ry="1.5" />
+              </g>
+              <g className="room-chair">
+                <path className="room-chair-wood" d="M112 148q10-3 21 0l-1 34-19 1Z" />
+                <path d="m116 152 13-1m-13 8 13-1m-12-5 1 24m8-25-1 25" strokeOpacity="0.55" />
+                <path className="room-chair-wood" d="m112 179 18-1 5 5-21 2-6-3Z" />
+                <path d="m114 185-4 12m20-13 4 13m-17-12-1 9m12-10 2 10m-17-3 19-1" />
+              </g>
               <path className="room-table" d="m98 163 117-1q4 0 7 2l16 7q3 3-2 4-75 2-150 0-4-1 0-4Z" />
               <path d="m88 176 1 4q71 2 145-1l1-3M94 181l-2 16m9-16-2 16m126-17 2 17m5-17 2 17" />
               <path d="m168 170 15-1m5 0h7" opacity="0.35" />
+              <g className="room-contact-shadows" fill="currentColor" fillOpacity="0.09" stroke="none">
+                <ellipse cx="98" cy="168" rx="9" ry="1.4" />
+                <ellipse cx="121" cy="168" rx="19" ry="1.4" />
+                <ellipse cx="149" cy="164" rx="9" ry="1.3" />
+                <ellipse cx="200" cy="167" rx="17" ry="1.3" />
+              </g>
               <path className="room-book" d="m103 158 26-2q2 0 3 2l7 5-29 3Z" />
               <path className="room-cup" d="m105 160 5 6 28-3v4l-28 3-5-6Z" />
               <path d="m110 166 28-3m-27 5 23-2m-27-7 5 4m17-6 5 4" opacity="0.6" />

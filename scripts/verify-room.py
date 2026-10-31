@@ -42,6 +42,9 @@ def verify():
                 expect(page.locator(".colophon")).to_have_count(0)
                 room = page.locator(".cozy-room")
                 expect(room).to_have_attribute("data-open", "false")
+                expect(page.locator('.room-chair')).to_have_count(1)
+                expect(page.locator('.room-daylight')).to_have_css('opacity', '0')
+                expect(page.locator('.room-contact-shadows')).to_have_count(2)
                 assert room.evaluate("e => getComputedStyle(e).position") == ("absolute" if width > 900 else "relative")
                 assert page.locator(".home-heading .cozy-room").count() == 0
                 content_box = page.locator(".home-content").bounding_box()
@@ -99,6 +102,10 @@ def verify():
                 expect(page.locator(".room-weather-caption")).to_contain_text("12° · Rainy · Windy")
                 expect(page.locator(".room-rain")).to_have_count(1)
                 expect(page.locator(".room-wind")).to_have_count(1)
+                assert float(page.locator('.room-daylight').evaluate('e => getComputedStyle(e).opacity')) > 0
+                chair_box = page.locator('.room-chair').bounding_box()
+                desk_bounds = page.locator('.room-desk').bounding_box()
+                assert chair_box['y'] + chair_box['height'] <= desk_bounds['y'] + desk_bounds['height'], "Chair feet leave the shared floor"
                 caption_box = page.locator('.room-caption').bounding_box()
                 shade_box = page.locator('.room-lamp-shade').bounding_box()
                 assert caption_box['y'] + caption_box['height'] + 4 <= shade_box['y'], "Weather caption collides with the lamp"

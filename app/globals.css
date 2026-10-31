@@ -23,6 +23,7 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --background: #1a1a18;
   --room-ink: #f5ecd9;
+  --room-daylight-opacity: 0.035;
   --foreground: #d4d4d4;
   --muted: #888;
   --subtle: #bbb;
@@ -62,6 +63,7 @@
   color-scheme: light;
   --background: #f5ecd9;
   --room-ink: #1a1a18;
+  --room-daylight-opacity: 0.12;
   --foreground: #2d2922;
   --muted: #70675a;
   --subtle: #554e43;
@@ -92,6 +94,7 @@
     color-scheme: light;
     --background: #f5ecd9;
     --room-ink: #1a1a18;
+    --room-daylight-opacity: 0.12;
     --foreground: #2d2922;
     --muted: #70675a;
     --subtle: #554e43;
@@ -681,13 +684,27 @@ body:has(.home-page) .site-nav-shell {
 }
 
 .room-window-reveal { fill: currentColor; fill-opacity: 0.035; }
+.room-window .room-drawing > svg { stroke-opacity: 0.7; }
+.room-weather-art { stroke-opacity: 0.7; }
+.room-table, .room-chair-wood { fill: var(--background); fill-opacity: 1; }
+.room-daylight {
+  fill: #e3c68b;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.cozy-room[data-open="true"] .room-daylight { opacity: var(--room-daylight-opacity); }
+.cozy-room[data-open="true"]:is([data-weather="rain"], [data-weather="storm"], [data-weather="fog"]) .room-daylight { opacity: calc(var(--room-daylight-opacity) * 0.4); }
+.cozy-room[data-open="true"][data-night="true"] .room-daylight { fill: #93abc3; opacity: calc(var(--room-daylight-opacity) * 0.35); }
 .room-sky { fill-opacity: 0.025; }
 .cozy-room[data-night="true"] .room-sky { fill-opacity: 0.12; }
 .room-weather-art { color: inherit; }
 .room-moon { fill-opacity: 0.3; }
 .room-curtain { transition: transform 220ms var(--ease-out); }
 .cozy-room[data-open="true"] .room-curtain { transition-duration: 280ms; transition-timing-function: var(--ease-drawer); }
-.room-curtain-fabric path + path { opacity: 0.35; }
+.room-curtain-pleats { opacity: 0.35; transition: opacity 220ms ease; }
+.room-curtain-gathered { opacity: 0; transition: opacity 220ms ease; }
+.cozy-room[data-open="true"] .room-curtain-pleats { opacity: 0.1; }
+.cozy-room[data-open="true"] .room-curtain-gathered { opacity: 1; }
 .room-curtain-fabric { transform-box: fill-box; transform-origin: center top; }
 .room-casement { transform-box: fill-box; transition: transform 280ms var(--ease-out); }
 .room-casement-left { transform-origin: left center; }
