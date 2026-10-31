@@ -42,13 +42,17 @@ def verify():
                 expect(page.locator(".colophon")).to_have_count(0)
                 room = page.locator(".cozy-room")
                 expect(room).to_have_attribute("data-open", "false")
-                assert room.evaluate("e => getComputedStyle(e).position") == "relative"
+                assert room.evaluate("e => getComputedStyle(e).position") == ("absolute" if width > 900 else "relative")
                 assert page.locator(".home-heading .cozy-room").count() == 0
                 content_box = page.locator(".home-content").bounding_box()
                 room_box = room.bounding_box()
                 if width > 900:
                     content_right = content_box['x'] + content_box['width']
-                    assert room_box['x'] >= content_right + 32, "Room overlaps the text column"
+                    window_box = page.locator('.room-window').bounding_box()
+                    desk_box = page.locator('.room-desk').bounding_box()
+                    assert window_box['x'] >= content_right + 16, "Window overlaps the text"
+                    assert desk_box['x'] >= content_right + 16, "Desk overlaps the text"
+                    assert abs(window_box['x'] + window_box['width'] / 2 - desk_box['x'] - desk_box['width'] / 2) < 50, "Desk is not grounded beneath the window"
                 else:
                     assert room_box["y"] >= content_box["y"] + content_box["height"] + 32, "Room interrupts the mobile text layout"
                 main_box = page.locator('.home-page').bounding_box()

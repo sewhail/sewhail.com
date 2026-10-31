@@ -581,23 +581,27 @@ body:has(.home-page) .site-nav-shell {
   max-width: 64rem;
 }
 
+/* Text and illustration share one wall, with furniture below the reading area. */
 .home-page {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
-  align-items: center;
-  gap: 4rem;
+  position: relative;
+  isolation: isolate;
   max-width: 64rem;
-  padding-block: 3rem 5rem;
+  min-height: 42.5rem;
+  padding-block: 6rem 9rem;
 }
 
 .home-content {
+  position: relative;
+  z-index: 1;
+  width: 49%;
   min-width: 0;
 }
 
 .cozy-room {
-  position: relative;
+  position: absolute;
+  z-index: 0;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 400 / 620;
   color: var(--room-ink);
   pointer-events: none;
 }
@@ -631,21 +635,21 @@ body:has(.home-page) .site-nav-shell {
   position: absolute;
   inset: 0;
   height: 100%;
-  opacity: 0.18;
-  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  opacity: 0.22;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 96%, transparent);
 }
 
-.cozy-room .room-architecture-wide { display: none; }
-.cozy-room .room-architecture-narrow { display: block; }
+.cozy-room .room-architecture-wide { display: block; }
+.cozy-room .room-architecture-narrow { display: none; }
 
-.room-window, .room-desk, .room-plant, .room-picture {
+.room-window, .room-desk, .room-plant {
   position: absolute;
 }
 
 .room-window {
-  top: 0;
-  left: 15%;
-  width: 70%;
+  top: 7%;
+  right: 8%;
+  width: 26%;
 }
 
 .room-drawing {
@@ -653,9 +657,9 @@ body:has(.home-page) .site-nav-shell {
 }
 
 .room-desk {
-  right: 0;
-  top: 54%;
-  width: 100%;
+  right: 3%;
+  bottom: 14%;
+  width: 41%;
 }
 
 .room-plant {
@@ -663,12 +667,6 @@ body:has(.home-page) .site-nav-shell {
   /* The pot base meets the tabletop in the desk's own SVG coordinates. */
   top: 42%;
   width: 14%;
-}
-
-.room-picture {
-  top: 35%;
-  left: 6%;
-  width: 8%;
 }
 
 .room-window-surround, .room-sill, .room-lamp-base,
@@ -874,13 +872,22 @@ body:has(.home-page) .site-nav-shell {
     max-width: 38rem;
   }
   .home-page {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 3rem;
+    min-height: 0;
+    padding-block: 3rem 3.5rem;
+  }
+  .home-content {
+    width: 100%;
   }
   .cozy-room {
-    width: min(100%, 22rem);
-    margin-inline: auto;
+    position: relative;
+    width: min(100%, 24rem);
+    aspect-ratio: 400 / 520;
+    margin: 3rem auto 0;
   }
+  .cozy-room .room-architecture-wide { display: none; }
+  .cozy-room .room-architecture-narrow { display: block; }
+  .room-window { top: 0; right: 15%; width: 70%; }
+  .room-desk { bottom: 4%; right: 0; width: 100%; }
 }
 
 .subpage-header {
@@ -1086,11 +1093,9 @@ body:has(.home-page) .site-nav-shell {
   .home-heading > div {
     min-width: 0;
   }
-  .home-page {
-    gap: 2.5rem;
-  }
   .cozy-room {
-    max-width: 20rem;
+    max-width: 22rem;
+    margin-top: 2.5rem;
   }
   .note-list article > header {
     display: block;

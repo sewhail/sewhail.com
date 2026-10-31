@@ -47,29 +47,18 @@ export function CozyRoom() {
   return (
     <div className="cozy-room" data-open={open} data-lit={lit} data-weather={condition?.kind} data-wind={wind} data-night={weather ? !weather.isDay : undefined}>
       <div className="room-stage">
-        <svg className="room-architecture room-architecture-wide" viewBox="0 0 928 672" fill="none" aria-hidden="true">
+        <svg className="room-architecture room-architecture-wide" viewBox="0 0 1024 680" preserveAspectRatio="none" fill="none" aria-hidden="true">
           <g stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M0 550q455 3 928 0M0 566q460-2 928 0" />
-            <path d="m148 566-44 106m229-106-16 106m204-106 13 106m186-106 42 106M0 627q457-3 928 0" opacity="0.65" />
-            <path d="M30 460q242 2 494 0" opacity="0.3" />
+            <path d="M0 574H944l80 44M0 584H941l83 46M944 0v574" />
+            <path d="m262 584-185 96m398-96-115 96m331-96-39 96m211-96 28 96M0 630h1024" opacity="0.55" />
           </g>
         </svg>
-        <svg className="room-architecture room-architecture-narrow" viewBox="0 0 400 620" fill="none" aria-hidden="true">
+        <svg className="room-architecture room-architecture-narrow" viewBox="0 0 400 520" fill="none" aria-hidden="true">
           <g stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M0 533q194 3 400 0M0 548q199-2 400 0" />
-            <path d="m89 548-15 72m155-72 2 72m119-72 23 72M0 593q200-2 400 0" opacity="0.65" />
+            <path d="M0 480h400M0 488h400" />
+            <path d="m89 488-15 32m155-32 2 32m119-32 23 32M0 510h400" opacity="0.55" />
           </g>
         </svg>
-        <div className="room-picture" aria-hidden="true">
-          <svg viewBox="12 54 28 38" fill="none">
-            <g stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m18 65 7-6 7 6" opacity="0.5" />
-              <path className="room-cup" d="m17 65 16-1 1 20-17 1Z" />
-              <path d="m20 69 10-1v12l-10 1Zm1 8 3-4 5 5" />
-              <circle cx="28" cy="71" r="1" fill="currentColor" stroke="none" />
-            </g>
-          </svg>
-        </div>
         <div className="room-window">
           <div className="room-drawing">
             <svg viewBox="35 7 185 160" fill="none" aria-hidden="true">
