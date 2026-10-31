@@ -102,7 +102,7 @@ def verify():
                 expect(page.locator(".room-weather-caption")).to_contain_text("12° · Rainy · Windy")
                 expect(page.locator(".room-rain")).to_have_count(1)
                 expect(page.locator(".room-wind")).to_have_count(1)
-                assert float(page.locator('.room-daylight').evaluate('e => getComputedStyle(e).opacity')) > 0
+                page.wait_for_function("Number(getComputedStyle(document.querySelector('.room-daylight')).opacity) > 0")
                 chair_box = page.locator('.room-chair').bounding_box()
                 desk_bounds = page.locator('.room-desk').bounding_box()
                 assert chair_box['y'] + chair_box['height'] <= desk_bounds['y'] + desk_bounds['height'], "Chair feet leave the shared floor"

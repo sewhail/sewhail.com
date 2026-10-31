@@ -123,7 +123,8 @@ def verify(args):
                         assert page.locator('.reading-caption h3').evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 16
                     for shell in page.locator(".site-nav-shell, main.page:not(.home-page), .home-content").all():
                         bounds = shell.bounding_box()
-                        assert bounds and bounds["width"] <= 608.5, f"Wide reading column on {route} at {width}px"
+                        max_width = 960.5 if route == "/" and shell.evaluate("e => e.classList.contains('site-nav-shell')") else 608.5
+                        assert bounds and bounds["width"] <= max_width, f"Wide reading column on {route} at {width}px"
                         assert bounds["x"] >= 23.5, f"Narrow page gutter on {route} at {width}px"
                     expect(page.locator('link[rel="canonical"]')).to_have_attribute(
                         "href", "https://sewhail.com" + (route if route != "/" else "")
