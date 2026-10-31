@@ -32,7 +32,7 @@ def verify():
     weather = room_checks.payload(61, 24)
     try:
         with sync_playwright() as p, room_checks.harness.local_browser(p) as browser:
-            for width in [1440, 768, 390, 320]:
+            for width in [1440, 1024, 1000, 768, 390, 320]:
                 context = browser.new_context(viewport={"width": width, "height": 900}, is_mobile=width < 600, has_touch=width < 600)
                 page = context.new_page()
                 page.on("pageerror", lambda error: errors.append(str(error)))
@@ -47,6 +47,21 @@ def verify():
                     assert items and any(item["state"] == "running" for item in items), (selector, items)
                     before = page.locator(selector).evaluate("e => getComputedStyle(e).transform")
                     page.wait_for_function("({selector, before}) => getComputedStyle(document.querySelector(selector)).transform !== before", arg={"selector": selector, "before": before})
+                travel = page.locator('.room-leaves').evaluate("""element => {
+                    const animation = element.getAnimations()[0];
+                    const previousTime = animation.currentTime;
+                    const duration = animation.effect.getTiming().duration;
+                    animation.pause();
+                    const centers = [0, 0.25, 0.5, 0.75].map(phase => {
+                        animation.currentTime = duration * phase;
+                        const box = element.getBoundingClientRect();
+                        return box.x + box.width / 2;
+                    });
+                    animation.currentTime = previousTime;
+                    animation.play();
+                    return Math.max(...centers) - Math.min(...centers);
+                }""")
+                assert travel >= 1.25, ('Leaf motion is still imperceptible at rendered size', width, travel)
                 for theme in ["light", "dark"]:
                     room_checks.set_theme(page, theme)
                     page.screenshot(path=str(evidence / f"{width}-{theme}-closed.png"), full_page=True)

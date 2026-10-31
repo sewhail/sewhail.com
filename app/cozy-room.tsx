@@ -47,11 +47,17 @@ export function CozyRoom() {
   return (
     <div className="cozy-room" data-open={open} data-lit={lit} data-weather={condition?.kind} data-wind={wind} data-night={weather ? !weather.isDay : undefined}>
       <div className="room-stage">
-        <svg className="room-architecture" viewBox="0 0 400 620" fill="none" aria-hidden="true">
-          <g stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M381 66q2 239 0 467l19 14M15 533q184 3 366 0M0 548q199-2 400 0" />
-            <path d="m89 558-15 62m155-62 2 62m119-62 23 62M0 593q200-2 400 0" />
-            <path d="M77 298q128 2 274 0" opacity="0.45" />
+        <svg className="room-architecture room-architecture-wide" viewBox="0 0 928 672" fill="none" aria-hidden="true">
+          <g stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M0 550q455 3 928 0M0 566q460-2 928 0" />
+            <path d="m148 566-44 106m229-106-16 106m204-106 13 106m186-106 42 106M0 627q457-3 928 0" opacity="0.65" />
+            <path d="M30 460q242 2 494 0" opacity="0.3" />
+          </g>
+        </svg>
+        <svg className="room-architecture room-architecture-narrow" viewBox="0 0 400 620" fill="none" aria-hidden="true">
+          <g stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M0 533q194 3 400 0M0 548q199-2 400 0" />
+            <path d="m89 548-15 72m155-72 2 72m119-72 23 72M0 593q200-2 400 0" opacity="0.65" />
           </g>
         </svg>
         <div className="room-picture" aria-hidden="true">

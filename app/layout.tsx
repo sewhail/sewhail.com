@@ -39,7 +39,7 @@ const themeScript = `
   })();
 `;
 
-const siteDescription = "Suhail, a software builder in Amsterdam. Software and books.";
+const siteDescription = "Suhail. Software and books.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sewhail.com"),
@@ -60,7 +60,6 @@ export const metadata: Metadata = {
         url: "/social-card-art.jpg",
         width: 1200,
         height: 630,
-        alt: "Abstract charcoal orbit and terracotta circle on warm paper",
       },
     ],
   },

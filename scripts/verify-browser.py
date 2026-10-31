@@ -109,14 +109,15 @@ def verify(args):
                         )
                         for selector in ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']:
                             expect(page.locator(selector)).to_have_attribute(
-                                "content", "Suhail, a software builder in Amsterdam. Software and books."
+                                "content", "Suhail. Software and books."
                             )
                         identity = page.locator(".name")
                         assert identity.evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 44
                         portrait = page.locator(".portrait-control").bounding_box()
                         assert portrait and portrait["width"] <= 56 and portrait["height"] <= 64
                         expect(page.locator('.portrait-control')).to_have_css('background-color', 'rgba(0, 0, 0, 0)')
-                        expect(page.locator('.avatar')).to_have_attribute('src', re.compile('avatar-ink-cameo'))
+                        expect(page.locator('.avatar')).to_have_attribute('src', re.compile('avatar-ink-plate'))
+                        expect(page.locator('.avatar')).to_have_css('filter', 'none')
                         cover_bounds = page.locator('.book-stack').bounding_box()
                         assert cover_bounds and cover_bounds["width"] <= 56
                         assert page.locator('.reading-caption h3').evaluate("element => parseFloat(getComputedStyle(element).fontSize)") <= 16

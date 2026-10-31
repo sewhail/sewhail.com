@@ -348,6 +348,7 @@ main:focus {
 }
 
 .portrait-control {
+  position: relative;
   width: 3.5rem;
   height: 4rem;
   flex-shrink: 0;
@@ -355,18 +356,31 @@ main:focus {
   background: transparent;
 }
 
+.portrait-control::after {
+  position: absolute;
+  inset: -2px;
+  border: 1px solid var(--room-ink);
+  border-radius: 2px 1px 3px 1px;
+  opacity: 0.3;
+  transform: rotate(-3deg);
+  pointer-events: none;
+  content: "";
+}
+
 .avatar {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: invert(1);
+  filter: none;
+  mix-blend-mode: normal;
+  clip-path: polygon(2% 1%, 98% 0, 100% 97%, 3% 100%, 0 52%);
 }
 
-:root[data-theme="light"] .avatar { filter: none; }
+:root[data-theme="light"] .avatar { mix-blend-mode: multiply; }
 
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) .avatar { filter: none; }
+  :root:not([data-theme]) .avatar { mix-blend-mode: multiply; }
 }
 
 .home-location {
@@ -385,6 +399,8 @@ main:focus {
 }
 
 .intro-copy > p {
+  width: fit-content;
+  max-width: 100%;
   font-size: 1.0625rem;
   line-height: 1.7;
   text-wrap: pretty;
@@ -581,27 +597,28 @@ main:focus {
   pointer-events: none;
 }
 
-.home-content > * {
+/* Keep quiet areas of the text layout transparent to the room's controls. */
+.home-content :is(.portrait-control, .name, .home-location, .intro-copy > p,
+  .links a, .discovery-link, .reading-object, .reading-caption, .preview-description) {
   pointer-events: auto;
 }
 
 .cozy-room {
   position: absolute;
   z-index: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: calc(50% + 19rem + 1.5rem);
+  inset: 0;
   color: var(--room-ink);
   pointer-events: none;
 }
 
 .room-stage {
   position: absolute;
-  top: 2.5rem;
+  top: 1rem;
   left: 0;
-  width: min(100%, 26rem);
-  aspect-ratio: 400 / 620;
+  right: 0;
+  width: min(100%, 58rem);
+  height: 42rem;
+  margin-inline: auto;
 }
 
 .cozy-room svg {
@@ -619,25 +636,27 @@ main:focus {
 .room-stage > :is(.room-window, .room-desk, .room-picture) > svg,
 .room-window .room-drawing > svg,
 .room-plant > svg {
-  stroke-opacity: 0.64;
+  stroke-opacity: 0.85;
 }
 
 .cozy-room .room-architecture {
   position: absolute;
   inset: 0;
   height: 100%;
-  opacity: 0.12;
-  mask-image: linear-gradient(to right, transparent, #000 28%);
+  opacity: 0.18;
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 }
+
+.cozy-room .room-architecture-narrow { display: none; }
 
 .room-window, .room-desk, .room-plant, .room-picture {
   position: absolute;
 }
 
 .room-window {
-  top: 7%;
-  left: 18%;
-  width: 70%;
+  top: 0;
+  right: 6rem;
+  width: 16.25rem;
 }
 
 .room-drawing {
@@ -645,21 +664,22 @@ main:focus {
 }
 
 .room-desk {
-  left: 0;
-  top: 54%;
-  width: 100%;
+  right: 0;
+  top: 20rem;
+  width: 25rem;
 }
 
 .room-plant {
   left: 5%;
-  bottom: 33%;
+  /* The pot base meets the tabletop in the desk's own SVG coordinates. */
+  top: 42%;
   width: 14%;
 }
 
 .room-picture {
-  top: 40%;
-  left: 6%;
-  width: 8%;
+  top: 10rem;
+  left: 33rem;
+  width: 2rem;
 }
 
 .room-window-surround, .room-sill, .room-lamp-base,
@@ -711,7 +731,8 @@ main:focus {
 .room-lamp-button { left: 54%; top: 4%; width: 33%; height: 67%; }
 .room-window-button:focus-visible, .room-lamp-button:focus-visible { outline: 2px solid var(--room-ink); outline-offset: 4px; }
 
-.room-drawing > svg { opacity: 0.85; transition: opacity 160ms ease; }
+.room-drawing > svg { opacity: 0.95; transition: opacity 160ms ease; }
+.room-drawing:has(.room-window-button:active) > svg { opacity: 1; }
 .room-lamp-shade { transition: opacity 160ms ease; }
 .room-drawing:has(.room-window-button:focus-visible) > svg { opacity: 1; }
 
@@ -723,27 +744,33 @@ main:focus {
 .room-caption {
   position: absolute;
   z-index: 2;
-  top: 100%;
+  top: calc(100% - 0.75rem);
   left: -6%;
   width: 112%;
-  padding-top: 0.25rem;
+  padding-top: 0.125rem;
   text-align: center;
   font-size: 0.6875rem;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 .room-weather-caption { color: var(--subtle); }
-.room-weather-detail { display: block; color: var(--muted); font-size: 0.625rem; margin-top: 0.2rem; }
+.room-weather-detail { display: block; color: var(--muted); font-size: 0.625rem; margin-top: 0.1rem; }
+.room-weather-caption > span { display: block; width: fit-content; max-width: 100%; margin-inline: auto; pointer-events: auto; }
 .room-caption a, .room-retry { pointer-events: auto; }
-.room-retry { display: block; margin: 0 auto; min-height: 44px; padding: 0.5rem; border: 0; background: transparent; color: var(--link); font: inherit; text-decoration: underline; cursor: pointer; }
-.room-leaves { transform-origin: 33px 147px; animation: room-leaf-breath 9s var(--ease-in-out) infinite; }
-.room-cat-body { transform-box: fill-box; transform-origin: center bottom; animation: room-cat-breathe 6.5s var(--ease-in-out) infinite; }
-.room-cord-swing { transform-origin: 197px 120px; animation: room-cord-settle 8.5s var(--ease-in-out) infinite; }
-.room-steam { opacity: 0.45; animation: room-steam-settle 9s var(--ease-in-out) infinite; }
-.room-steam-wisp { animation: room-steam-rise 4.8s linear infinite; }
-.room-steam-wisp + .room-steam-wisp { animation-duration: 5.6s; animation-delay: -2.8s; }
-.cozy-room[data-open="true"] .room-curtain-fabric { animation: room-curtain-breathe 7s var(--ease-in-out) infinite; }
-.cozy-room[data-open="true"] .room-curtain-right .room-curtain-fabric { animation-duration: 8.5s; animation-delay: -3s; }
-.cozy-room[data-open="true"][data-wind="windy"] .room-leaves { animation: room-leaf-gust 6s var(--ease-in-out) infinite; }
+.room-weather-caption:has(.room-retry) { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.room-weather-caption:has(.room-retry) > span { margin-inline: 0; }
+.room-retry { display: block; min-width: 44px; min-height: 44px; padding: 0.25rem; border: 0; background: transparent; color: var(--link); font: inherit; text-decoration: underline; cursor: pointer; }
+.room-retry:active { color: var(--strong); }
+.room-leaves { transform-origin: 33px 147px; animation: room-leaf-breath 6s var(--ease-in-out) -1s infinite; }
+.room-cat-body { transform-box: fill-box; transform-origin: center bottom; animation: room-cat-breathe 5s var(--ease-in-out) -1.5s infinite; }
+.room-cord-swing { transform-origin: 197px 120px; animation: room-cord-settle 4.5s var(--ease-in-out) -0.6s infinite; }
+.room-steam { opacity: 0.75; animation: room-steam-settle 7s var(--ease-in-out) -2s infinite; }
+.room-steam-wisp { animation: room-steam-rise 4s linear -1s infinite; }
+.room-steam-wisp + .room-steam-wisp { animation-duration: 4.8s; animation-delay: -3s; }
+.room-curtain-fabric { animation: room-curtain-rest 6.5s var(--ease-in-out) -1.8s infinite; }
+.room-curtain-right .room-curtain-fabric { animation-duration: 7.5s; animation-delay: -4s; }
+.cozy-room[data-open="true"] .room-curtain-fabric { animation-name: room-curtain-breathe; }
+.cozy-room[data-open="true"][data-wind="breezy"] .room-curtain-fabric { animation-duration: 5.5s; }
+.cozy-room[data-open="true"][data-wind="windy"] .room-leaves { animation-name: room-leaf-gust; animation-duration: 5.5s; }
 .cozy-room[data-open="true"][data-wind="windy"] .room-curtain-fabric { animation-name: room-curtain-gust; animation-duration: 5s; }
 
 .room-cloud { animation: room-cloud-drift 42s linear infinite; }
@@ -771,30 +798,34 @@ main:focus {
 .cozy-room[data-open="false"] .room-weather-art * { animation-play-state: paused; }
 
 @keyframes room-leaf-breath {
-  0%, 100% { transform: rotate(-0.6deg); }
-  46% { transform: rotate(0.8deg); }
+  0%, 100% { transform: rotate(-2deg); }
+  46% { transform: rotate(3deg); }
 }
 @keyframes room-leaf-gust {
-  0%, 100% { transform: rotate(-1deg); }
-  43% { transform: rotate(2.8deg); }
-  74% { transform: rotate(0.3deg); }
+  0%, 100% { transform: rotate(-3deg); }
+  43% { transform: rotate(5deg); }
+  74% { transform: rotate(0.8deg); }
 }
 @keyframes room-cat-breathe {
   0%, 100% { transform: scaleY(1); }
-  48% { transform: scaleY(1.025); }
+  48% { transform: scaleY(1.06); }
 }
 @keyframes room-cord-settle {
-  0%, 100% { transform: rotate(-0.65deg); }
-  47% { transform: rotate(0.5deg); }
+  0%, 100% { transform: rotate(-2.5deg); }
+  47% { transform: rotate(2.5deg); }
+}
+@keyframes room-curtain-rest {
+  0%, 100% { transform: skewX(-0.8deg); }
+  48% { transform: skewX(1deg); }
 }
 @keyframes room-curtain-breathe {
-  0%, 100% { transform: skewX(-0.5deg); }
-  48% { transform: skewX(0.8deg); }
+  0%, 100% { transform: skewX(-2deg); }
+  48% { transform: skewX(2.5deg); }
 }
 @keyframes room-curtain-gust {
-  0%, 100% { transform: skewX(-0.7deg); }
-  42% { transform: skewX(2.2deg); }
-  73% { transform: skewX(0.3deg); }
+  0%, 100% { transform: skewX(-3deg); }
+  42% { transform: skewX(5deg); }
+  73% { transform: skewX(0.8deg); }
 }
 @keyframes room-steam-settle {
   0%, 100% { transform: translateX(-0.2px); }
@@ -802,8 +833,8 @@ main:focus {
 }
 @keyframes room-steam-rise {
   from { transform: translate(0, 1px); opacity: 0; }
-  20%, 55% { opacity: 0.7; }
-  to { transform: translate(1.5px, -8px); opacity: 0; }
+  20%, 60% { opacity: 0.85; }
+  to { transform: translate(2px, -10px); opacity: 0; }
 }
 @keyframes room-cloud-drift {
   from { transform: translateX(0); }
@@ -848,20 +879,26 @@ main:focus {
   55% { opacity: 0.6; }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1000px) {
   .home-page {
     min-height: 0;
-    padding-bottom: min(41.6rem, 160vw);
+    /* Reserve exactly the centered stage's 400:620 aspect ratio. */
+    padding-bottom: min(40.3rem, calc(155vw - 3.1rem));
   }
+  .home-content { padding-bottom: 1.5rem; }
   .cozy-room {
     top: auto;
-    bottom: 0;
-    left: auto;
-    width: min(100%, 26rem);
+    width: min(calc(100% - 2rem), 26rem);
     height: auto;
-    aspect-ratio: 5 / 8;
+    margin-inline: auto;
+    aspect-ratio: 400 / 620;
   }
-  .room-stage { top: 0.5rem; }
+  .room-stage { top: 0; width: 100%; height: 100%; }
+  .cozy-room .room-architecture-wide { display: none; }
+  .cozy-room .room-architecture-narrow { display: block; }
+  .room-window { top: 0; right: auto; left: 15%; width: 70%; }
+  .room-desk { top: 54%; right: 0; width: 100%; }
+  .room-picture { top: 35%; left: 6%; width: 8%; }
 }
 
 .subpage-header {
@@ -1068,10 +1105,10 @@ main:focus {
     min-width: 0;
   }
   .home-page {
-    padding: 0 0 min(41.6rem, 160vw);
+    padding: 0 0 min(40.3rem, calc(155vw - 3.1rem));
   }
   .home-content {
-    padding-block: 2.5rem 3.5rem;
+    padding-block: 2.5rem 1.5rem;
   }
   .note-list article > header {
     display: block;

@@ -33,7 +33,7 @@ def verify():
     errors = []
     try:
         with sync_playwright() as p, harness.local_browser(p) as browser:
-            for width in [1440, 768, 390, 320]:
+            for width in [1440, 1200, 1024, 1000, 768, 390, 320]:
                 context = browser.new_context(viewport={"width": width, "height": 900}, reduced_motion="reduce")
                 page = context.new_page()
                 page.on("pageerror", lambda e: errors.append(str(e)))
@@ -46,10 +46,13 @@ def verify():
                 assert page.locator(".home-heading .cozy-room").count() == 0
                 content_box = page.locator(".home-content").bounding_box()
                 room_box = room.bounding_box()
-                if width > 1200:
-                    assert room_box["x"] >= content_box["x"] + content_box["width"], "Room overlaps the reading column"
+                if width > 1000:
+                    window_box = page.locator('.room-window').bounding_box()
+                    desk_box = page.locator('.room-desk').bounding_box()
+                    content_right = content_box['x'] + content_box['width']
+                    assert window_box['x'] < content_right and desk_box['x'] < content_right, "Room is still stranded outside the page composition"
                 else:
-                    assert room_box["y"] >= content_box["y"] + content_box["height"] - 1, "Room inserts itself into original content"
+                    assert room_box["y"] >= content_box["y"] + content_box["height"] - 1, "Room interrupts the mobile text layout"
                 assert page.locator(".introduction").evaluate("e => getComputedStyle(e).marginTop") == "28px"
                 for theme, ink in [("light", "rgb(26, 26, 24)"), ("dark", "rgb(245, 236, 217)")]:
                     set_theme(page, theme)
@@ -57,6 +60,10 @@ def verify():
                     expect(page.locator(".room-window-surround")).to_have_css("stroke", ink)
                     expect(page.locator(".room-lamp-shade")).to_have_css("stroke", ink)
                     page.screenshot(path=str(evidence / f"{width}-{theme}-closed.png"), full_page=True)
+                paragraph = page.locator('.intro-copy > p')
+                paragraph.click(click_count=3)
+                assert 'I build software' in page.evaluate('window.getSelection().toString()'), 'Background blocks text selection'
+                page.evaluate('window.getSelection().removeAllRanges()')
                 window = page.locator(".room-window-button")
                 window.hover()
                 expect(window).to_have_attribute("aria-expanded", "false")

@@ -26,7 +26,7 @@ export function Portrait() {
   return (
     <div className="portrait-control">
       <Image
-        src="/avatar-ink-cameo.png"
+        src="/avatar-ink-plate.jpg"
         alt="Ink portrait of Suhail"
         width={480}
         height={560}
